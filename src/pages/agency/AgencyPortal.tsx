@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import PortalLayout from '@/components/layouts/PortalLayout';
 import { StatCard } from '@/components/shared/StatCard';
-import { Outlet, useLocation, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenantSubscription } from '@/hooks/useTenantSubscription';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, Crown } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import {
   LayoutDashboard, Users, ClipboardCheck, CalendarDays, Tag, DollarSign,
   Settings, BarChart3, Star, UserPlus, Wallet, Heart, ShoppingBag, Package,
