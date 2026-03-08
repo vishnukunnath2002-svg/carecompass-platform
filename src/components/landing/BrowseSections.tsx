@@ -419,7 +419,7 @@ interface AgencyTenant {
 
 export function BrowseAgenciesSection() {
   const [agencies, setAgencies] = useState<(AgencyTenant & { _serviceCount: number; _avgRating: number | null; _reviewCount: number })[]>([]);
-  const [selectedAgency, setSelectedAgency] = useState<AgencyTenant | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAgencies = async () => {
