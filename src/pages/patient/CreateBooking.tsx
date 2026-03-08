@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, Star, CheckCircle, ArrowLeft } from 'lucide-react';
+import { CalendarDays, Star, CheckCircle, ArrowLeft, ShoppingBag, Package } from 'lucide-react';
 import PaymentSimulation from '@/components/care/PaymentSimulation';
+import { useCart } from '@/contexts/CartContext';
 
 interface Provider {
   id: string;
