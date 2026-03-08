@@ -169,6 +169,7 @@ const App = () => (
               <Route path="reviews" element={<ReviewsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<MyProfile />} />
+              <Route path="checkout" element={<CheckoutPage />} />
             </Route>
 
             {/* Agency Portal */}
