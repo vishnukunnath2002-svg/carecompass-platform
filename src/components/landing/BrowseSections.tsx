@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Package, Star, ShoppingCart, MapPin, Store, Search, Navigation, CheckCircle, Clock, Users } from 'lucide-react';
-import AgencyProfileDialog from '@/components/care/AgencyProfileDialog';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
