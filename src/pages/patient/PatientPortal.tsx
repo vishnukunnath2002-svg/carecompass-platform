@@ -3,7 +3,7 @@ import { StatCard } from '@/components/shared/StatCard';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Heart, Search, ShoppingBag, Store, CalendarDays,
-  FileText, Wallet, Bell, Star, User, Users, Package
+  FileText, Wallet, Bell, Star, User, Users, Package, ClipboardList
 } from 'lucide-react';
 
 const navItems = [
