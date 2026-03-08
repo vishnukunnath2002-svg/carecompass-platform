@@ -55,6 +55,7 @@ import PayoutsPage from "./pages/admin/PayoutsPage";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import ContentManager from "./pages/admin/ContentManager";
 import NotificationTemplates from "./pages/admin/NotificationTemplates";
+import ModulesSubscriptions from "./pages/admin/ModulesSubscriptions";
 
 // Agency pages
 import StaffManagement from "./pages/agency/StaffManagement";
