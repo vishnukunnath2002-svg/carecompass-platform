@@ -369,8 +369,8 @@ export function NearbyPharmaciesSection() {
             <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-shadow cursor-pointer">
               <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 shrink-0">
-                    <Store className="h-6 w-6 text-emerald-500" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                    <Store className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground truncate">{s.store_name}</p>
