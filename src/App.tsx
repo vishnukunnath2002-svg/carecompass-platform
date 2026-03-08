@@ -23,6 +23,15 @@ import StorePortal from "./pages/store/StorePortal";
 import HospitalPortal from "./pages/hospital/HospitalPortal";
 import PlaceholderPage from "./pages/shared/PlaceholderPage";
 
+// Functional pages
+import FindCare from "./pages/patient/FindCare";
+import MyBookings from "./pages/patient/MyBookings";
+import ShopProducts from "./pages/patient/ShopProducts";
+import NearbyStores from "./pages/patient/NearbyStores";
+import TenantsPage from "./pages/admin/TenantsPage";
+import UsersPage from "./pages/admin/UsersPage";
+import BookingsMonitor from "./pages/admin/BookingsMonitor";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -47,14 +56,14 @@ const App = () => (
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
-              <Route path="tenants" element={<PlaceholderPage title="Tenant Management" />} />
-              <Route path="users" element={<PlaceholderPage title="User Management" />} />
+              <Route path="tenants" element={<TenantsPage />} />
+              <Route path="users" element={<UsersPage />} />
               <Route path="onboarding" element={<PlaceholderPage title="Onboarding Queue" />} />
               <Route path="categories" element={<PlaceholderPage title="Categories & Tags" />} />
               <Route path="features" element={<PlaceholderPage title="Feature Flags" />} />
               <Route path="commissions" element={<PlaceholderPage title="Commission Rules" />} />
               <Route path="promos" element={<PlaceholderPage title="Promo Codes" />} />
-              <Route path="bookings" element={<PlaceholderPage title="Bookings Monitor" />} />
+              <Route path="bookings" element={<BookingsMonitor />} />
               <Route path="orders" element={<PlaceholderPage title="Product Orders" />} />
               <Route path="store-orders" element={<PlaceholderPage title="Store Orders" />} />
               <Route path="disputes" element={<PlaceholderPage title="Disputes" />} />
@@ -66,10 +75,10 @@ const App = () => (
 
             {/* Patient Portal */}
             <Route path="/patient" element={<PatientPortal />}>
-              <Route path="find-care" element={<PlaceholderPage title="Find Care" />} />
-              <Route path="bookings" element={<PlaceholderPage title="My Bookings" />} />
-              <Route path="shop" element={<PlaceholderPage title="Shop Products" />} />
-              <Route path="stores" element={<PlaceholderPage title="Nearby Stores" />} />
+              <Route path="find-care" element={<FindCare />} />
+              <Route path="bookings" element={<MyBookings />} />
+              <Route path="shop" element={<ShopProducts />} />
+              <Route path="stores" element={<NearbyStores />} />
               <Route path="health" element={<PlaceholderPage title="Health Records" />} />
               <Route path="profiles" element={<PlaceholderPage title="Patient Profiles" />} />
               <Route path="wallet" element={<PlaceholderPage title="Wallet" />} />
