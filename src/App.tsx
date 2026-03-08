@@ -134,6 +134,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/renew" element={<SubscriptionRenewal />} />
 
             {/* Registration */}
             <Route path="/register" element={<RegisterSelect />} />
