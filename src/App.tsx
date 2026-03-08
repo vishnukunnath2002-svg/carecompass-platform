@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ import InvoicesPage from "./pages/patient/InvoicesPage";
 import ReviewsPage from "./pages/patient/ReviewsPage";
 import NotificationsPage from "./pages/patient/NotificationsPage";
 import MyProfile from "./pages/patient/MyProfile";
+import CheckoutPage from "./pages/patient/CheckoutPage";
 
 // Admin pages
 import TenantsPage from "./pages/admin/TenantsPage";
@@ -116,6 +118,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <CartProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -166,6 +169,7 @@ const App = () => (
               <Route path="reviews" element={<ReviewsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<MyProfile />} />
+              <Route path="checkout" element={<CheckoutPage />} />
             </Route>
 
             {/* Agency Portal */}
@@ -240,6 +244,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </CartProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
