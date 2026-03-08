@@ -41,6 +41,17 @@ export default function CheckoutPage() {
     await new Promise(r => setTimeout(r, 2000));
 
     try {
+      // Record wallet debit if paying via wallet
+      if (paymentMethod === 'wallet') {
+        await supabase.from('wallet_transactions').insert({
+          user_id: user.id,
+          type: 'debit',
+          source: 'product_order',
+          amount: total,
+          description: `Payment for order — ${items.length} item(s)`,
+          reference_type: 'order',
+        } as any);
+      }
       // Create vendor orders (grouped by tenant)
       const tenantGroups = new Map<string, typeof vendorItems>();
       vendorItems.forEach(item => {
