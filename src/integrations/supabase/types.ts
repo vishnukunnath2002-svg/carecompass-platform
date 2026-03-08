@@ -1646,6 +1646,65 @@ export type Database = {
           },
         ]
       }
+      service_requests: {
+        Row: {
+          agency_notes: string | null
+          created_at: string
+          description: string
+          id: string
+          patient_condition: string | null
+          patient_id: string
+          patient_name: string
+          patient_phone: string | null
+          preferred_shift: string | null
+          preferred_start_date: string | null
+          service_type: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          agency_notes?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          patient_condition?: string | null
+          patient_id: string
+          patient_name: string
+          patient_phone?: string | null
+          preferred_shift?: string | null
+          preferred_start_date?: string | null
+          service_type: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          agency_notes?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          patient_condition?: string | null
+          patient_id?: string
+          patient_name?: string
+          patient_phone?: string | null
+          preferred_shift?: string | null
+          preferred_start_date?: string | null
+          service_type?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specialization_tags: {
         Row: {
           category: string | null
