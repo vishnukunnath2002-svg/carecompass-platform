@@ -6,7 +6,7 @@ import {
   ArrowRight, Stethoscope, Baby, UserCheck, Home, Activity,
   ChevronRight, Phone, Mail, MapPin
 } from 'lucide-react';
-import { BrowseServicesSection, ShopProductsSection, NearbyPharmaciesSection } from '@/components/landing/BrowseSections';
+import { BrowseServicesSection, ShopProductsSection, NearbyPharmaciesSection, BrowseAgenciesSection } from '@/components/landing/BrowseSections';
 
 const serviceTypes = [
   { icon: Stethoscope, label: 'Home Nurses', desc: 'Qualified nurses for post-surgery, chronic care & more' },

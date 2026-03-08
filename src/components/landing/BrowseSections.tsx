@@ -400,3 +400,132 @@ export function NearbyPharmaciesSection() {
     </section>
   );
 }
+
+// ─── Browse Agencies Section ────────────────────────────────────────────
+
+interface AgencyTenant {
+  id: string;
+  name: string;
+  brand_name: string | null;
+  logo_url: string | null;
+  city: string | null;
+  state: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  website: string | null;
+  address_line1: string | null;
+  status: string;
+}
+
+export function BrowseAgenciesSection() {
+  const [agencies, setAgencies] = useState<(AgencyTenant & { _serviceCount: number; _avgRating: number | null; _reviewCount: number })[]>([]);
+  const [selectedAgency, setSelectedAgency] = useState<AgencyTenant | null>(null);
+
+  useEffect(() => {
+    const fetchAgencies = async () => {
+      const { data: tenants } = await supabase.from('tenants')
+        .select('id, name, brand_name, logo_url, city, state, contact_email, contact_phone, website, address_line1, status')
+        .eq('type', 'agency')
+        .eq('status', 'active')
+        .limit(12);
+      if (!tenants || tenants.length === 0) return;
+
+      // Get service counts and reviews per agency
+      const enriched = await Promise.all(tenants.map(async (t: any) => {
+        const [sRes, rRes] = await Promise.all([
+          supabase.from('agency_services').select('id', { count: 'exact', head: true }).eq('tenant_id', t.id).eq('is_active', true),
+          supabase.from('reviews').select('rating').eq('target_type', 'agency').eq('target_id', t.id),
+        ]);
+        const reviewData = rRes.data || [];
+        const avg = reviewData.length > 0 ? reviewData.reduce((s: number, r: any) => s + r.rating, 0) / reviewData.length : null;
+        return { ...t, _serviceCount: sRes.count || 0, _avgRating: avg ? parseFloat(avg.toFixed(1)) : null, _reviewCount: reviewData.length };
+      }));
+      setAgencies(enriched);
+    };
+    fetchAgencies();
+  }, []);
+
+  if (agencies.length === 0) return null;
+
+  return (
+    <>
+      <section className="py-16 lg:py-20 bg-muted/20">
+        <div className="container">
+          <div className="mb-8">
+            <h2 className="font-display text-2xl font-bold text-foreground">Top Healthcare Agencies</h2>
+            <p className="text-sm text-muted-foreground mt-1">Discover verified agencies and request personalised care</p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {agencies.map(a => (
+              <div
+                key={a.id}
+                onClick={() => setSelectedAgency(a)}
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-card via-card to-muted/50 shadow-card hover:shadow-elevated transition-all hover:-translate-y-1"
+              >
+                {/* Glass top strip */}
+                <div className="relative h-24 bg-gradient-to-br from-primary/70 via-primary/50 to-accent/30 overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,_hsl(var(--primary)/0.3),_transparent_60%)]" />
+                  <div className="absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-white/5 blur-xl" />
+                  {/* Verified badge */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-success/90 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-success-foreground">
+                    <CheckCircle className="h-3 w-3" /> Verified
+                  </div>
+                  {/* Rating */}
+                  {a._avgRating && (
+                    <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-sm font-semibold shadow-sm">
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" /> {a._avgRating}
+                    </div>
+                  )}
+                  {/* Logo */}
+                  <div className="absolute -bottom-8 left-5">
+                    {a.logo_url ? (
+                      <img src={a.logo_url} alt={a.name} className="h-16 w-16 rounded-2xl border-4 border-card object-cover shadow-md" />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-card bg-primary/10 shadow-md">
+                        <Users className="h-7 w-7 text-primary" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="px-5 pb-5 pt-10 space-y-3">
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                      {a.brand_name || a.name}
+                    </h3>
+                    {(a.city || a.state) && (
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <MapPin className="h-3 w-3" /> {[a.city, a.state].filter(Boolean).join(', ')}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground border-t border-border/50 pt-3">
+                    <span className="flex items-center gap-1">
+                      <Package className="h-3.5 w-3.5 text-primary" /> {a._serviceCount} service{a._serviceCount !== 1 ? 's' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5 text-warning" /> {a._reviewCount} review{a._reviewCount !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <Button size="sm" className="w-full rounded-full gradient-primary border-0 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    View Profile
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <AgencyProfileDialog
+        agency={selectedAgency}
+        open={!!selectedAgency}
+        onOpenChange={(open) => !open && setSelectedAgency(null)}
+      />
+    </>
+  );
+}
+
