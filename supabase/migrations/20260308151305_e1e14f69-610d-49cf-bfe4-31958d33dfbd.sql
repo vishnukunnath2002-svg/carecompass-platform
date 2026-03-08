@@ -1,0 +1,1 @@
+ALTER TYPE tenant_type ADD VALUE IF NOT EXISTS 'provider';
