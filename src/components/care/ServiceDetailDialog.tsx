@@ -59,32 +59,29 @@ export default function ServiceDetailDialog({ service, open, onOpenChange }: Pro
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
 
   useEffect(() => {
-    if (!service || !open) return;
-    const promises: Promise<any>[] = [];
+    if (!service || !open) {
+      setStaff([]);
+      setEquipment([]);
+      return;
+    }
 
     if (service.assigned_staff && service.assigned_staff.length > 0) {
-      promises.push(
-        supabase.from('caregiver_profiles')
-          .select('id, provider_type, qualification, years_experience, specializations, languages, rating, bio')
-          .in('id', service.assigned_staff)
-          .then(({ data }) => setStaff((data as StaffMember[]) || []))
-      );
+      supabase.from('caregiver_profiles')
+        .select('id, provider_type, qualification, years_experience, specializations, languages, rating, bio')
+        .in('id', service.assigned_staff)
+        .then(({ data }) => setStaff((data as StaffMember[]) || []));
     } else {
       setStaff([]);
     }
 
     if (service.equipment_suggestions && service.equipment_suggestions.length > 0) {
-      promises.push(
-        supabase.from('products')
-          .select('id, name, price, brand')
-          .in('id', service.equipment_suggestions)
-          .then(({ data }) => setEquipment((data as EquipmentItem[]) || []))
-      );
+      supabase.from('products')
+        .select('id, name, price, brand')
+        .in('id', service.equipment_suggestions)
+        .then(({ data }) => setEquipment((data as EquipmentItem[]) || []));
     } else {
       setEquipment([]);
     }
-
-    Promise.all(promises);
   }, [service, open]);
 
   if (!service) return null;
