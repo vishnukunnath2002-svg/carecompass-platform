@@ -65,6 +65,19 @@ function PortalSidebar({ portalName, navItems }: { portalName: string; navItems:
     </Sidebar>
   );
 }
+function SubscriptionBanner({ variant, message }: { variant: 'expired' | 'warning'; message: string }) {
+  const navigate = useNavigate();
+  const isExp = variant === 'expired';
+  return (
+    <div className={`${isExp ? 'bg-destructive/10 border-destructive/20' : 'bg-warning/10 border-warning/20'} border-b px-6 py-3 flex items-center gap-3`}>
+      <AlertTriangle className={`h-4 w-4 ${isExp ? 'text-destructive' : 'text-warning'}`} />
+      <span className={`text-sm font-medium flex-1 ${isExp ? 'text-destructive' : 'text-warning'}`}>{message}</span>
+      <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={() => navigate('/renew')}>
+        <CreditCard className="h-3.5 w-3.5" /> Renew Now
+      </Button>
+    </div>
+  );
+}
 
 export default function PortalLayout({ children, portalName, navItems }: PortalLayoutProps) {
   const { isExpired, daysRemaining } = useTenantSubscription();
