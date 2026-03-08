@@ -148,7 +148,7 @@ export default function FindCare() {
                       </span>
                     )}
                   </div>
-                  <Button size="sm" onClick={() => navigate(`/patient/bookings?provider=${p.id}`)}>
+                  <Button size="sm" onClick={() => navigate(`/patient/book?provider=${p.id}`)}>
                     Book Now
                   </Button>
                 </div>

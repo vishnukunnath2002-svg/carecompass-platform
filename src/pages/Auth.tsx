@@ -3,12 +3,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Hospital, Users, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const demoAccounts = [
   { role: 'Super Admin', email: 'admin@cylo.demo', password: 'demo1234', icon: Shield, color: 'bg-foreground', path: '/admin' },
@@ -19,6 +19,48 @@ const demoAccounts = [
   { role: 'Hospital', email: 'hospital@cylo.demo', password: 'demo1234', icon: Hospital, color: 'bg-destructive', path: '/hospital' },
   { role: 'Patient / Family', email: 'patient@cylo.demo', password: 'demo1234', icon: Users, color: 'bg-info', path: '/patient' },
 ];
+
+const roleToPath: Record<string, string> = {
+  super_admin: '/admin',
+  admin_manager: '/admin',
+  verification_officer: '/admin',
+  finance_admin: '/admin',
+  support_agent: '/admin',
+  content_manager: '/admin',
+  patient: '/patient',
+  agency_admin: '/agency',
+  agency_ops: '/agency',
+  agency_booking: '/agency',
+  agency_support: '/agency',
+  agency_recruiter: '/agency',
+  agency_finance: '/agency',
+  provider: '/provider',
+  vendor_admin: '/vendor',
+  vendor_catalogue: '/vendor',
+  vendor_inventory: '/vendor',
+  vendor_orders: '/vendor',
+  vendor_finance: '/vendor',
+  store_admin: '/store',
+  store_counter: '/store',
+  store_inventory: '/store',
+  store_dispatch: '/store',
+  hospital_admin: '/hospital',
+  hospital_procurement: '/hospital',
+  hospital_discharge: '/hospital',
+  hospital_nursing: '/hospital',
+};
+
+async function getRedirectPath(userId: string): Promise<string> {
+  const { data } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+  if (data && data.length > 0) {
+    const firstRole = data[0].role as string;
+    return roleToPath[firstRole] || '/patient';
+  }
+  return '/patient';
+}
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -34,11 +76,14 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
     } else {
-      navigate('/patient');
+      const { data: { user } } = await supabase.auth.getUser();
+      const path = user ? await getRedirectPath(user.id) : '/patient';
+      setLoading(false);
+      navigate(path);
     }
   };
 
@@ -50,7 +95,7 @@ export default function Auth() {
     if (error) {
       toast({ title: 'Registration failed', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Check your email', description: 'We sent a confirmation link.' });
+      toast({ title: 'Account created!', description: 'You can now sign in.' });
     }
   };
 
@@ -67,7 +112,6 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
       <div className="border-b bg-card">
         <div className="container flex h-14 items-center">
           <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -82,7 +126,6 @@ export default function Auth() {
 
       <div className="container py-12">
         <div className="grid gap-12 lg:grid-cols-2">
-          {/* Left: Auth form */}
           <div className="mx-auto w-full max-w-md">
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -140,7 +183,6 @@ export default function Auth() {
             </Tabs>
           </div>
 
-          {/* Right: Demo accounts */}
           <div>
             <div className="mb-6">
               <h2 className="font-display text-2xl font-bold text-foreground">Quick Demo Access</h2>
