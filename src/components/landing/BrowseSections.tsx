@@ -460,7 +460,7 @@ export function BrowseAgenciesSection() {
             {agencies.map(a => (
               <div
                 key={a.id}
-                onClick={() => setSelectedAgency(a)}
+                onClick={() => navigate(`/agency/${a.domain_slug || a.id}`)}
                 className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-card via-card to-muted/50 shadow-card hover:shadow-elevated transition-all hover:-translate-y-1"
               >
                 {/* Glass top strip */}
