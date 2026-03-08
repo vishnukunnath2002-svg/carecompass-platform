@@ -145,7 +145,8 @@ const App = () => (
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
-              <Route path="modules" element={<ModulesSubscriptions />} />
+              <Route path="modules" element={<ModulesPage />} />
+              <Route path="plans" element={<SubscriptionPlansPage />} />
               <Route path="tenants" element={<TenantsPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="onboarding" element={<OnboardingQueue />} />
