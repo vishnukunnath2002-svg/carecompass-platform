@@ -112,7 +112,7 @@ export default function CreateBooking() {
     setStep('payment');
   };
 
-  const handlePaymentComplete = async () => {
+  const handlePaymentComplete = async (paymentMethod?: string) => {
     setLoading(true);
     const { data, error } = await supabase.from('bookings').insert({
       customer_id: user!.id,
@@ -150,6 +150,19 @@ export default function CreateBooking() {
         type: 'booking',
         link: '/patient/bookings',
       });
+
+      // Record wallet debit if wallet payment
+      if (paymentMethod === 'wallet') {
+        await supabase.from('wallet_transactions').insert({
+          user_id: user!.id,
+          type: 'debit',
+          source: 'booking',
+          amount: Math.round(amount * 1.18),
+          description: `Payment for booking ${data.booking_number}`,
+          reference_type: 'booking',
+          reference_id: data.id,
+        } as any);
+      }
 
       setBookingId(data.id);
       setBookingNumber(data.booking_number);
