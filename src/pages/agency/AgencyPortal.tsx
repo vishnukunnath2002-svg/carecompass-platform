@@ -10,7 +10,7 @@ import { Lock, Crown } from 'lucide-react';
 import {
   LayoutDashboard, Users, ClipboardCheck, CalendarDays, Tag, DollarSign,
   Settings, BarChart3, Star, UserPlus, Wallet, Heart, ShoppingBag, Package,
-  Handshake, ArrowRightLeft
+  Handshake, ArrowRightLeft, ClipboardList
 } from 'lucide-react';
 
 // Basic items accessible to ALL plans
