@@ -25,7 +25,7 @@ export default function PaymentSimulation({ amount, onPaymentComplete, onBack, l
     setCompleted(true);
     // Short delay to show success state
     await new Promise(resolve => setTimeout(resolve, 1000));
-    onPaymentComplete();
+    onPaymentComplete(method);
   };
 
   if (completed) {
