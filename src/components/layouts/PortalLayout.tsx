@@ -84,16 +84,16 @@ export default function PortalLayout({ children, portalName, navItems }: PortalL
             </div>
           </header>
           {isExpired && (
-            <div className="bg-destructive/10 border-b border-destructive/20 px-6 py-3 flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-              <span className="text-sm font-medium text-destructive">Your subscription has expired. Please contact the administrator to renew your plan.</span>
-            </div>
+            <SubscriptionBanner
+              variant="expired"
+              message="Your subscription has expired. Renew now to continue using the platform."
+            />
           )}
           {!isExpired && daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0 && (
-            <div className="bg-warning/10 border-b border-warning/20 px-6 py-3 flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-warning" />
-              <span className="text-sm font-medium text-warning">Your subscription expires in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Contact admin to renew.</span>
-            </div>
+            <SubscriptionBanner
+              variant="warning"
+              message={`Your subscription expires in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}. Renew now to avoid interruption.`}
+            />
           )}
           <main className="flex-1 p-6">{children}</main>
         </div>
