@@ -55,7 +55,8 @@ import PayoutsPage from "./pages/admin/PayoutsPage";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import ContentManager from "./pages/admin/ContentManager";
 import NotificationTemplates from "./pages/admin/NotificationTemplates";
-import ModulesSubscriptions from "./pages/admin/ModulesSubscriptions";
+import ModulesPage from "./pages/admin/ModulesPage";
+import SubscriptionPlansPage from "./pages/admin/SubscriptionPlansPage";
 
 // Agency pages
 import StaffManagement from "./pages/agency/StaffManagement";
@@ -69,6 +70,10 @@ import AgencyReviews from "./pages/agency/AgencyReviews";
 import AgencyPayouts from "./pages/agency/AgencyPayouts";
 import AgencyReports from "./pages/agency/AgencyReports";
 import AgencySettings from "./pages/agency/AgencySettings";
+import AgencyEquipment from "./pages/agency/AgencyEquipment";
+import AgencyInventory from "./pages/agency/AgencyInventory";
+import PharmacyPartnerships from "./pages/agency/PharmacyPartnerships";
+import PatientReferrals from "./pages/agency/PatientReferrals";
 
 // Provider pages
 import ProviderBookings from "./pages/provider/ProviderBookings";
@@ -140,7 +145,8 @@ const App = () => (
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
-              <Route path="modules" element={<ModulesSubscriptions />} />
+              <Route path="modules" element={<ModulesPage />} />
+              <Route path="plans" element={<SubscriptionPlansPage />} />
               <Route path="tenants" element={<TenantsPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="onboarding" element={<OnboardingQueue />} />
@@ -189,6 +195,10 @@ const App = () => (
               <Route path="payouts" element={<AgencyPayouts />} />
               <Route path="reports" element={<AgencyReports />} />
               <Route path="settings" element={<AgencySettings />} />
+              <Route path="equipment" element={<AgencyEquipment />} />
+              <Route path="inventory" element={<AgencyInventory />} />
+              <Route path="partnerships" element={<PharmacyPartnerships />} />
+              <Route path="referrals" element={<PatientReferrals />} />
             </Route>
 
             {/* Provider Portal */}

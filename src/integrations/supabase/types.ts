@@ -1020,6 +1020,109 @@ export type Database = {
           },
         ]
       }
+      pharmacy_partnerships: {
+        Row: {
+          agency_tenant_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+          store_tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          agency_tenant_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          store_tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          agency_tenant_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          store_tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_partnerships_agency_tenant_id_fkey"
+            columns: ["agency_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pharmacy_partnerships_store_tenant_id_fkey"
+            columns: ["store_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacy_referrals: {
+        Row: {
+          agency_tenant_id: string
+          booking_id: string | null
+          created_at: string
+          id: string
+          partnership_id: string | null
+          patient_user_id: string | null
+          reason: string | null
+          status: string | null
+          store_tenant_id: string
+        }
+        Insert: {
+          agency_tenant_id: string
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          partnership_id?: string | null
+          patient_user_id?: string | null
+          reason?: string | null
+          status?: string | null
+          store_tenant_id: string
+        }
+        Update: {
+          agency_tenant_id?: string
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          partnership_id?: string | null
+          patient_user_id?: string | null
+          reason?: string | null
+          status?: string | null
+          store_tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_referrals_agency_tenant_id_fkey"
+            columns: ["agency_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pharmacy_referrals_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacy_partnerships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pharmacy_referrals_store_tenant_id_fkey"
+            columns: ["store_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_config: {
         Row: {
           description: string | null
@@ -1671,6 +1774,7 @@ export type Database = {
           max_listings: number | null
           max_users: number | null
           module: string
+          modules_included: string[] | null
           name: string
           price_monthly: number
           price_yearly: number
@@ -1690,6 +1794,7 @@ export type Database = {
           max_listings?: number | null
           max_users?: number | null
           module: string
+          modules_included?: string[] | null
           name: string
           price_monthly?: number
           price_yearly?: number
@@ -1709,6 +1814,7 @@ export type Database = {
           max_listings?: number | null
           max_users?: number | null
           module?: string
+          modules_included?: string[] | null
           name?: string
           price_monthly?: number
           price_yearly?: number
