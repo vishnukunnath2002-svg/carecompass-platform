@@ -184,6 +184,7 @@ const App = () => (
               <Route path="profile" element={<MyProfile />} />
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="orders" element={<MyOrders />} />
+              <Route path="service-requests" element={<MyServiceRequests />} />
             </Route>
 
             {/* Agency Portal */}
