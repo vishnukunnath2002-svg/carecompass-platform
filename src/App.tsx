@@ -22,6 +22,7 @@ import ProviderPortal from "./pages/provider/ProviderPortal";
 import VendorPortal from "./pages/vendor/VendorPortal";
 import StorePortal from "./pages/store/StorePortal";
 import HospitalPortal from "./pages/hospital/HospitalPortal";
+import SubscriptionRenewal from "./pages/shared/SubscriptionRenewal";
 
 // Patient pages
 import FindCare from "./pages/patient/FindCare";
