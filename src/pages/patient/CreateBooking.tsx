@@ -259,6 +259,38 @@ export default function CreateBooking() {
             <Button variant="outline" className="mt-3" onClick={() => navigate('/patient/shop')}>Browse All Products →</Button>
           </div>
         )}
+
+        {/* Cross-module: Pharmacy Suggestions when products are out of stock */}
+        {pharmacySuggestions.length > 0 && (
+          <div className="mt-8 w-full max-w-2xl">
+            <h3 className="font-display text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+              <Store className="h-5 w-5 text-emerald-500" /> Nearby Pharmacies
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">Some recommended products are out of stock. Order from a nearby pharmacy instead.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {pharmacySuggestions.map((s: any) => (
+                <Card key={s.id} className="border shadow-card">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 shrink-0">
+                      <Store className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{s.store_name}</p>
+                      {s.owner_name && <p className="text-xs text-muted-foreground">{s.owner_name}</p>}
+                      <div className="flex items-center gap-2 mt-1">
+                        {s.rating > 0 && <span className="flex items-center gap-0.5 text-xs"><Star className="h-3 w-3 fill-warning text-warning" />{s.rating}</span>}
+                        {s.delivery_available && <Badge variant="outline" className="text-xs">Delivery</Badge>}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => navigate('/patient/stores')}>
+                      <MapPin className="h-3.5 w-3.5 mr-1" /> Visit
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
