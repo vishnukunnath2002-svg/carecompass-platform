@@ -214,6 +214,15 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Browse Services */}
+      <BrowseServicesSection />
+
+      {/* Shop Products */}
+      <ShopProductsSection />
+
+      {/* Nearby Pharmacies */}
+      <NearbyPharmaciesSection />
+
       {/* CTA */}
       <section className="gradient-hero py-20">
         <div className="container text-center">
