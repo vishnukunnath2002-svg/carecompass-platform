@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import MultiStepForm from '@/components/registration/MultiStepForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
+import { usePincodeAutoFill } from '@/hooks/usePincodeAutoFill';
+import { Loader2 } from 'lucide-react';
 const steps = [
   { title: 'Account', description: 'Create your login credentials.' },
   { title: 'Patient Profile', description: 'Tell us about the patient who needs care.' },
