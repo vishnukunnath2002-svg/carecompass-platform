@@ -2297,7 +2297,12 @@ export type Database = {
         | "bystander"
         | "domestic_helper"
       tenant_status: "pending" | "active" | "suspended" | "deactivated"
-      tenant_type: "agency" | "vendor" | "medical_store" | "hospital"
+      tenant_type:
+        | "agency"
+        | "vendor"
+        | "medical_store"
+        | "hospital"
+        | "provider"
       verification_status: "pending" | "under_review" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -2485,7 +2490,13 @@ export const Constants = {
         "domestic_helper",
       ],
       tenant_status: ["pending", "active", "suspended", "deactivated"],
-      tenant_type: ["agency", "vendor", "medical_store", "hospital"],
+      tenant_type: [
+        "agency",
+        "vendor",
+        "medical_store",
+        "hospital",
+        "provider",
+      ],
       verification_status: ["pending", "under_review", "approved", "rejected"],
     },
   },
