@@ -181,7 +181,9 @@ export default function Auth() {
                     <CardTitle className="font-display">Join CYLO</CardTitle>
                     <CardDescription>Select your role to begin the guided registration</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="p-3">
+                    <ScrollArea className="h-[340px] pr-3">
+                    <div className="space-y-3">
                     {[
                       { label: 'Patient / Family', desc: 'Book care, order medicines, shop products', icon: Users, color: 'bg-info', path: '/register/patient' },
                       { label: 'Homecare Agency', desc: 'Manage staff, bookings & healthcare services', icon: Building2, color: 'bg-primary', path: '/register/agency' },
