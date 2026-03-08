@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Hospital, Users, ArrowLeft } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -181,7 +182,9 @@ export default function Auth() {
                     <CardTitle className="font-display">Join CYLO</CardTitle>
                     <CardDescription>Select your role to begin the guided registration</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="p-3">
+                    <ScrollArea className="h-[340px] pr-3">
+                    <div className="space-y-3">
                     {[
                       { label: 'Patient / Family', desc: 'Book care, order medicines, shop products', icon: Users, color: 'bg-info', path: '/register/patient' },
                       { label: 'Homecare Agency', desc: 'Manage staff, bookings & healthcare services', icon: Building2, color: 'bg-primary', path: '/register/agency' },
@@ -204,6 +207,8 @@ export default function Auth() {
                         </div>
                       </button>
                     ))}
+                    </div>
+                    </ScrollArea>
                   </CardContent>
                 </Card>
               </TabsContent>
