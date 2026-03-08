@@ -101,6 +101,10 @@ export default function Auth() {
 
   const handleDemoLogin = async (account: typeof demoAccounts[0]) => {
     setLoading(true);
+    // Seed demo data first (idempotent)
+    try {
+      await supabase.functions.invoke('seed-demo');
+    } catch {}
     const { error } = await signIn(account.email, account.password);
     setLoading(false);
     if (error) {
