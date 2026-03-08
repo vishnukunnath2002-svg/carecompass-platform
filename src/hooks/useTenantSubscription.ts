@@ -11,6 +11,9 @@ interface TenantSubscription {
   started_at: string;
   expires_at: string | null;
   plan_name?: string;
+  modules_included?: string[];
+  max_users?: number | null;
+  max_listings?: number | null;
 }
 
 interface TenantInfo {
@@ -36,16 +39,19 @@ export function useTenantSubscription() {
       return;
     }
 
-    const fetchTenantData = async () => {
-      // Get tenant where user is owner
+    const fetchAll = async () => {
+      // 1. Get tenant
+      let tenantInfo: TenantInfo | null = null;
+
       const { data: tenantData } = await supabase
         .from('tenants')
         .select('*')
         .eq('owner_user_id', user.id)
         .single();
 
-      if (!tenantData) {
-        // Check via user_roles
+      if (tenantData) {
+        tenantInfo = tenantData as any;
+      } else {
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('tenant_id')
@@ -59,28 +65,28 @@ export function useTenantSubscription() {
             .select('*')
             .eq('id', roleData[0].tenant_id)
             .single();
-          if (t) setTenant(t as any);
+          if (t) tenantInfo = t as any;
         }
-      } else {
-        setTenant(tenantData as any);
       }
-    };
 
-    fetchTenantData().then(async () => {
-      if (!tenant) {
+      setTenant(tenantInfo);
+
+      if (!tenantInfo) {
         setLoading(false);
         return;
       }
 
+      // 2. Get active subscription with plan details
       const { data: subData } = await supabase
         .from('tenant_subscriptions')
-        .select('*, subscription_plans(name)')
-        .eq('tenant_id', tenant.id)
+        .select('*, subscription_plans(name, modules_included, max_users, max_listings)')
+        .eq('tenant_id', tenantInfo.id)
         .order('created_at', { ascending: false })
         .limit(1);
 
       if (subData && subData.length > 0) {
         const sub = subData[0];
+        const plan = (sub as any).subscription_plans;
         const subInfo: TenantSubscription = {
           id: sub.id,
           tenant_id: sub.tenant_id,
@@ -89,22 +95,25 @@ export function useTenantSubscription() {
           is_trial: sub.is_trial,
           started_at: sub.started_at,
           expires_at: sub.expires_at,
-          plan_name: (sub as any).subscription_plans?.name,
+          plan_name: plan?.name,
+          modules_included: plan?.modules_included || [],
+          max_users: plan?.max_users,
+          max_listings: plan?.max_listings,
         };
         setSubscription(subInfo);
 
         if (sub.expires_at) {
           const expiry = new Date(sub.expires_at);
           const now = new Date();
-          const expired = expiry < now;
-          setIsExpired(expired);
-          const diff = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          setDaysRemaining(diff);
+          setIsExpired(expiry < now);
+          setDaysRemaining(Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         }
       }
       setLoading(false);
-    });
-  }, [user, tenant?.id]);
+    };
+
+    fetchAll();
+  }, [user]);
 
   return { subscription, tenant, loading, isExpired, daysRemaining };
 }
