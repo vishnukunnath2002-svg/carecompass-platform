@@ -206,6 +206,8 @@ export default function Auth() {
                         </div>
                       </button>
                     ))}
+                    </div>
+                    </ScrollArea>
                   </CardContent>
                 </Card>
               </TabsContent>
