@@ -70,6 +70,10 @@ import AgencyReviews from "./pages/agency/AgencyReviews";
 import AgencyPayouts from "./pages/agency/AgencyPayouts";
 import AgencyReports from "./pages/agency/AgencyReports";
 import AgencySettings from "./pages/agency/AgencySettings";
+import AgencyEquipment from "./pages/agency/AgencyEquipment";
+import AgencyInventory from "./pages/agency/AgencyInventory";
+import PharmacyPartnerships from "./pages/agency/PharmacyPartnerships";
+import PatientReferrals from "./pages/agency/PatientReferrals";
 
 // Provider pages
 import ProviderBookings from "./pages/provider/ProviderBookings";
