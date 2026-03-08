@@ -152,6 +152,15 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Browse Services */}
+      <BrowseServicesSection />
+
+      {/* Shop Products */}
+      <ShopProductsSection />
+
+      {/* Nearby Pharmacies */}
+      <NearbyPharmaciesSection />
+
       {/* 3 Modules */}
       <section id="modules" className="bg-muted/50 py-20 lg:py-28">
         <div className="container">
@@ -213,15 +222,6 @@ export default function Index() {
           </div>
         </div>
       </section>
-
-      {/* Browse Services */}
-      <BrowseServicesSection />
-
-      {/* Shop Products */}
-      <ShopProductsSection />
-
-      {/* Nearby Pharmacies */}
-      <NearbyPharmaciesSection />
 
       {/* CTA */}
       <section className="gradient-hero py-20">

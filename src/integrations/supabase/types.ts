@@ -59,6 +59,71 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_services: {
+        Row: {
+          assigned_staff: string[] | null
+          conditions_served: string[] | null
+          created_at: string | null
+          description: string | null
+          equipment_suggestions: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price_daily: number | null
+          price_hourly: number | null
+          price_weekly: number | null
+          rating: number | null
+          review_count: number | null
+          service_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_staff?: string[] | null
+          conditions_served?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          equipment_suggestions?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price_daily?: number | null
+          price_hourly?: number | null
+          price_weekly?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_staff?: string[] | null
+          conditions_served?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          equipment_suggestions?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price_daily?: number | null
+          price_hourly?: number | null
+          price_weekly?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -134,6 +199,7 @@ export type Database = {
         Row: {
           add_ons: Json | null
           address_id: string | null
+          agency_service_id: string | null
           booking_number: string
           commission_amount: number | null
           created_at: string
@@ -160,6 +226,7 @@ export type Database = {
         Insert: {
           add_ons?: Json | null
           address_id?: string | null
+          agency_service_id?: string | null
           booking_number?: string
           commission_amount?: number | null
           created_at?: string
@@ -186,6 +253,7 @@ export type Database = {
         Update: {
           add_ons?: Json | null
           address_id?: string | null
+          agency_service_id?: string | null
           booking_number?: string
           commission_amount?: number | null
           created_at?: string
@@ -215,6 +283,13 @@ export type Database = {
             columns: ["address_id"]
             isOneToOne: false
             referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_agency_service_id_fkey"
+            columns: ["agency_service_id"]
+            isOneToOne: false
+            referencedRelation: "agency_services"
             referencedColumns: ["id"]
           },
           {

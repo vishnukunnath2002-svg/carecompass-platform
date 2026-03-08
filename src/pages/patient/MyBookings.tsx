@@ -4,8 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, User, Eye } from 'lucide-react';
+import { CalendarDays, Clock, User, Eye, Star } from 'lucide-react';
 import BookingDetailDialog from '@/components/care/BookingDetailDialog';
+import ReviewForm from '@/components/care/ReviewForm';
 
 interface Booking {
   id: string;
@@ -20,6 +21,7 @@ interface Booking {
   notes: string | null;
   created_at: string;
   provider_id: string | null;
+  agency_service_id: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -35,6 +37,8 @@ export default function MyBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [reviewingBookingId, setReviewingBookingId] = useState<string | null>(null);
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 
   const fetchBookings = () => {
     if (!user) return;
@@ -48,6 +52,14 @@ export default function MyBookings() {
         setLoading(false);
       });
   };
+
+  // Check which bookings already have reviews
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('reviews').select('target_id').eq('user_id', user.id).eq('target_type', 'agency_service').then(({ data }) => {
+      if (data) setReviewedIds(new Set(data.map(r => r.target_id)));
+    });
+  }, [user]);
 
   useEffect(() => { fetchBookings(); }, [user]);
 
@@ -83,42 +95,64 @@ export default function MyBookings() {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <Card key={b.id} className="border shadow-card hover:shadow-elevated transition-all cursor-pointer" onClick={() => setSelectedBooking(b)}>
-              <CardContent className="flex items-center justify-between p-5">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display font-semibold text-foreground">{b.booking_number}</span>
-                    <Badge className={statusColors[b.status || 'pending'] + ' capitalize'}>{b.status}</Badge>
+            <div key={b.id}>
+              <Card className="border shadow-card hover:shadow-elevated transition-all cursor-pointer" onClick={() => setSelectedBooking(b)}>
+                <CardContent className="flex items-center justify-between p-5">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display font-semibold text-foreground">{b.booking_number}</span>
+                      <Badge className={statusColors[b.status || 'pending'] + ' capitalize'}>{b.status}</Badge>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      {b.start_date && (
+                        <span className="flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5" /> {new Date(b.start_date).toLocaleDateString('en-IN')}
+                        </span>
+                      )}
+                      {b.shift_type && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" /> {b.shift_type}
+                        </span>
+                      )}
+                      {b.service_type && (
+                        <span className="flex items-center gap-1">
+                          <User className="h-3.5 w-3.5" /> {b.service_type}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {b.start_date && (
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" /> {new Date(b.start_date).toLocaleDateString('en-IN')}
-                      </span>
-                    )}
-                    {b.shift_type && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" /> {b.shift_type}
-                      </span>
-                    )}
-                    {b.service_type && (
-                      <span className="flex items-center gap-1">
-                        <User className="h-3.5 w-3.5" /> {b.service_type}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      {b.total_amount && (
+                        <div className="font-display font-semibold text-foreground">₹{b.total_amount.toLocaleString('en-IN')}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground capitalize">{b.payment_status}</div>
+                    </div>
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Show review prompt for completed bookings with an agency_service_id */}
+              {b.status === 'completed' && b.agency_service_id && !reviewedIds.has(b.agency_service_id) && (
+                <div className="mt-2 ml-4">
+                  {reviewingBookingId === b.id ? (
+                    <ReviewForm
+                      targetId={b.agency_service_id}
+                      targetType="agency_service"
+                      onComplete={() => {
+                        setReviewingBookingId(null);
+                        setReviewedIds(prev => new Set([...prev, b.agency_service_id!]));
+                      }}
+                    />
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setReviewingBookingId(b.id)}>
+                      <Star className="h-3.5 w-3.5 mr-1.5 text-warning" /> Rate this service
+                    </Button>
+                  )}
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    {b.total_amount && (
-                      <div className="font-display font-semibold text-foreground">₹{b.total_amount.toLocaleString('en-IN')}</div>
-                    )}
-                    <div className="text-xs text-muted-foreground capitalize">{b.payment_status}</div>
-                  </div>
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           ))}
         </div>
       )}

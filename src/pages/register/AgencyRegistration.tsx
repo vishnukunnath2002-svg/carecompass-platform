@@ -8,12 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import MultiStepForm from '@/components/registration/MultiStepForm';
 import FeatureTour from '@/components/registration/FeatureTour';
 import PlanSelector from '@/components/registration/PlanSelector';
+import PaymentSimulation from '@/components/care/PaymentSimulation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const steps = [
   { title: 'Choose Plan', description: 'Select a subscription plan for your agency.' },
+  { title: 'Payment', description: 'Complete payment to activate your plan.' },
   { title: 'Business Identity', description: 'Basic information about your agency.' },
   { title: 'Service Profile', description: 'What services does your agency offer?' },
   { title: 'Compliance & Documents', description: 'Upload required documents.' },
@@ -24,6 +26,8 @@ export default function AgencyRegistration() {
   const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
     planId: '' as string | null,
+    planPrice: 0,
+    paymentDone: false,
     companyName: '', brandName: '', ownerName: '', phone: '', email: '', password: '',
     gst: '', regNumber: '', regAddress: '', opAddress: '', city: '', state: '', pincode: '', website: '',
     services: '', specializations: '', serviceAreas: '', staffCount: '', is247: false, shiftSupport: false, comboServices: false,
@@ -32,11 +36,22 @@ export default function AgencyRegistration() {
     staffLogins: '', modulesRequired: '', needBrandedPage: false, needSubdomain: false, notes: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPlanDetails, setSelectedPlanDetails] = useState<any>(null);
   const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const update = (key: string, value: any) => setForm({ ...form, [key]: value });
+
+  const handlePlanSelect = async (planId: string) => {
+    update('planId', planId);
+    // Fetch plan price
+    const { data } = await supabase.from('subscription_plans').select('*').eq('id', planId).single();
+    if (data) {
+      setSelectedPlanDetails(data);
+      setForm(f => ({ ...f, planId, planPrice: data.price_monthly || 0 }));
+    }
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -47,7 +62,6 @@ export default function AgencyRegistration() {
       return;
     }
 
-    // Get the user ID and provision tenant
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       try {
@@ -86,9 +100,38 @@ export default function AgencyRegistration() {
       {(step, next, prev) => (
         <div className="space-y-4">
           {step === 0 && (
-            <PlanSelector selectedPlanId={form.planId} onSelect={(id) => update('planId', id)} />
+            <PlanSelector selectedPlanId={form.planId} onSelect={handlePlanSelect} />
           )}
           {step === 1 && (
+            <>
+              {form.planPrice > 0 && !form.paymentDone ? (
+                <PaymentSimulation
+                  amount={form.planPrice}
+                  onPaymentComplete={() => {
+                    setForm(f => ({ ...f, paymentDone: true }));
+                    toast({ title: 'Payment successful!', description: 'Your plan has been activated.' });
+                  }}
+                  onBack={prev}
+                  loading={false}
+                  receipt={`plan_${form.planId}`}
+                  description={`Subscription: ${selectedPlanDetails?.name || 'Plan'}`}
+                />
+              ) : form.planPrice === 0 || (selectedPlanDetails?.is_free_trial) ? (
+                <div className="text-center py-8">
+                  <p className="font-display text-lg font-semibold text-foreground">Free Trial / No Payment Required</p>
+                  <p className="text-sm text-muted-foreground mt-1">You can proceed directly to registration.</p>
+                  <Button className="mt-4 gradient-primary border-0" onClick={next}>Continue</Button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="font-display text-lg font-semibold text-success">✓ Payment Complete</p>
+                  <p className="text-sm text-muted-foreground mt-1">Your plan is activated. Continue with registration.</p>
+                  <Button className="mt-4 gradient-primary border-0" onClick={next}>Continue</Button>
+                </div>
+              )}
+            </>
+          )}
+          {step === 2 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Company Name *</Label><Input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} /></div>
@@ -115,7 +158,7 @@ export default function AgencyRegistration() {
               <div className="space-y-2"><Label>Website</Label><Input value={form.website} onChange={(e) => update('website', e.target.value)} /></div>
             </>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <>
               <div className="space-y-2"><Label>Services Offered</Label><Textarea value={form.services} onChange={(e) => update('services', e.target.value)} placeholder="Home nursing, elder care, baby care..." /></div>
               <div className="space-y-2"><Label>Specialization Types</Label><Textarea value={form.specializations} onChange={(e) => update('specializations', e.target.value)} placeholder="Cardiac, post-surgery, neuro..." /></div>
@@ -130,7 +173,7 @@ export default function AgencyRegistration() {
               </div>
             </>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <>
               <p className="text-sm text-muted-foreground">Document upload will be available after account creation. Please have these ready.</p>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -144,7 +187,7 @@ export default function AgencyRegistration() {
               </div>
             </>
           )}
-          {step === 4 && (
+          {step === 5 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Staff Logins Needed</Label><Input type="number" value={form.staffLogins} onChange={(e) => update('staffLogins', e.target.value)} /></div>
@@ -157,12 +200,14 @@ export default function AgencyRegistration() {
               <div className="space-y-2"><Label>Additional Notes</Label><Textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} /></div>
             </>
           )}
-          <div className="flex justify-between pt-4">
-            {step > 0 ? <Button variant="outline" onClick={prev}>Previous</Button> : <div />}
-            <Button onClick={next} className="gradient-primary border-0" disabled={isSubmitting}>
-              {step === steps.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit Application') : 'Next'}
-            </Button>
-          </div>
+          {step !== 1 && (
+            <div className="flex justify-between pt-4">
+              {step > 0 ? <Button variant="outline" onClick={prev}>Previous</Button> : <div />}
+              <Button onClick={next} className="gradient-primary border-0" disabled={isSubmitting || (step === 0 && !form.planId)}>
+                {step === steps.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit Application') : 'Next'}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </MultiStepForm>
