@@ -112,6 +112,18 @@ export default function StoreRegistration() {
               </div>
               <div className="space-y-2"><Label>Password *</Label><Input type="password" value={form.password} onChange={(e) => update('password', e.target.value)} minLength={8} /></div>
               <div className="space-y-2"><Label>Store Address *</Label><Input value={form.storeAddress} onChange={(e) => update('storeAddress', e.target.value)} /></div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Pincode</Label>
+                  <div className="relative">
+                    <Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} placeholder="6-digit pincode" />
+                    {pincodeLookup.loading && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
+                  {pincodeLookup.error && <p className="text-xs text-destructive">{pincodeLookup.error}</p>}
+                </div>
+                <div className="space-y-2"><Label>City</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} readOnly={!!pincodeLookup.city} className={pincodeLookup.city ? 'bg-muted' : ''} /></div>
+                <div className="space-y-2"><Label>State</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} readOnly={!!pincodeLookup.state} className={pincodeLookup.state ? 'bg-muted' : ''} /></div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Drug Licence Number</Label><Input value={form.drugLicence} onChange={(e) => update('drugLicence', e.target.value)} /></div>
                 <div className="space-y-2"><Label>GST Number</Label><Input value={form.gst} onChange={(e) => update('gst', e.target.value)} /></div>
