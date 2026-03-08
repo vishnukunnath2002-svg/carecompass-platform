@@ -23,6 +23,7 @@ import VendorPortal from "./pages/vendor/VendorPortal";
 import StorePortal from "./pages/store/StorePortal";
 import HospitalPortal from "./pages/hospital/HospitalPortal";
 import SubscriptionRenewal from "./pages/shared/SubscriptionRenewal";
+import AgencyProfile from "./pages/AgencyProfile";
 
 // Patient pages
 import FindCare from "./pages/patient/FindCare";
@@ -137,6 +138,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/renew" element={<SubscriptionRenewal />} />
+            <Route path="/agency/:slug" element={<AgencyProfile />} />
 
             {/* Registration */}
             <Route path="/register" element={<RegisterSelect />} />

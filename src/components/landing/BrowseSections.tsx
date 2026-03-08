@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Package, Star, ShoppingCart, MapPin, Store, Search, Navigation, CheckCircle, Clock, Users } from 'lucide-react';
-import AgencyProfileDialog from '@/components/care/AgencyProfileDialog';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -415,17 +414,18 @@ interface AgencyTenant {
   contact_phone: string | null;
   website: string | null;
   address_line1: string | null;
+  domain_slug: string | null;
   status: string;
 }
 
 export function BrowseAgenciesSection() {
   const [agencies, setAgencies] = useState<(AgencyTenant & { _serviceCount: number; _avgRating: number | null; _reviewCount: number })[]>([]);
-  const [selectedAgency, setSelectedAgency] = useState<AgencyTenant | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAgencies = async () => {
       const { data: tenants } = await supabase.from('tenants')
-        .select('id, name, brand_name, logo_url, city, state, contact_email, contact_phone, website, address_line1, status')
+        .select('id, name, brand_name, logo_url, city, state, contact_email, contact_phone, website, address_line1, domain_slug, status')
         .eq('type', 'agency')
         .eq('status', 'active')
         .limit(12);
@@ -461,7 +461,7 @@ export function BrowseAgenciesSection() {
             {agencies.map(a => (
               <div
                 key={a.id}
-                onClick={() => setSelectedAgency(a)}
+                onClick={() => navigate(`/agency/${a.domain_slug || a.id}`)}
                 className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-card via-card to-muted/50 shadow-card hover:shadow-elevated transition-all hover:-translate-y-1"
               >
                 {/* Glass top strip */}
@@ -521,11 +521,6 @@ export function BrowseAgenciesSection() {
         </div>
       </section>
 
-      <AgencyProfileDialog
-        agency={selectedAgency}
-        open={!!selectedAgency}
-        onOpenChange={(open) => !open && setSelectedAgency(null)}
-      />
     </>
   );
 }
