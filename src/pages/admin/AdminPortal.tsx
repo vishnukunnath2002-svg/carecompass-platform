@@ -3,12 +3,13 @@ import { StatCard } from '@/components/shared/StatCard';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, Users, ClipboardCheck, Settings, Tag, Sliders, Gift,
-  CalendarDays, ShoppingBag, Store, AlertTriangle, Wallet, BarChart3, FileText, Bell, Layers
+  CalendarDays, ShoppingBag, Store, AlertTriangle, Wallet, BarChart3, FileText, Bell, Layers, CreditCard
 } from 'lucide-react';
 
 const navItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Modules & Plans', url: '/admin/modules', icon: Layers },
+  { title: 'Modules', url: '/admin/modules', icon: Layers },
+  { title: 'Subscription Plans', url: '/admin/plans', icon: CreditCard },
   { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
   { title: 'Users', url: '/admin/users', icon: Users },
   { title: 'Onboarding Queue', url: '/admin/onboarding', icon: ClipboardCheck },

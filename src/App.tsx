@@ -195,6 +195,10 @@ const App = () => (
               <Route path="payouts" element={<AgencyPayouts />} />
               <Route path="reports" element={<AgencyReports />} />
               <Route path="settings" element={<AgencySettings />} />
+              <Route path="equipment" element={<AgencyEquipment />} />
+              <Route path="inventory" element={<AgencyInventory />} />
+              <Route path="partnerships" element={<PharmacyPartnerships />} />
+              <Route path="referrals" element={<PatientReferrals />} />
             </Route>
 
             {/* Provider Portal */}
