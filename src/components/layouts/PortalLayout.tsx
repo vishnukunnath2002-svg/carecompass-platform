@@ -7,7 +7,8 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
-import { Heart, LogOut, LucideIcon, AlertTriangle } from 'lucide-react';
+import { Heart, LogOut, LucideIcon, AlertTriangle, CreditCard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTenantSubscription } from '@/hooks/useTenantSubscription';
 
 interface NavItem {
