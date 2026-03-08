@@ -424,7 +424,7 @@ export function BrowseAgenciesSection() {
   useEffect(() => {
     const fetchAgencies = async () => {
       const { data: tenants } = await supabase.from('tenants')
-        .select('id, name, brand_name, logo_url, city, state, contact_email, contact_phone, website, address_line1, status')
+        .select('id, name, brand_name, logo_url, city, state, contact_email, contact_phone, website, address_line1, domain_slug, status')
         .eq('type', 'agency')
         .eq('status', 'active')
         .limit(12);
