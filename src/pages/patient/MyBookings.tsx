@@ -4,7 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, User } from 'lucide-react';
+import { CalendarDays, Clock, User, Eye } from 'lucide-react';
+import BookingDetailDialog from '@/components/care/BookingDetailDialog';
 
 interface Booking {
   id: string;
@@ -16,7 +17,9 @@ interface Booking {
   service_type: string | null;
   total_amount: number | null;
   payment_status: string | null;
+  notes: string | null;
   created_at: string;
+  provider_id: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -31,8 +34,9 @@ export default function MyBookings() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  useEffect(() => {
+  const fetchBookings = () => {
     if (!user) return;
     supabase
       .from('bookings')
@@ -43,7 +47,9 @@ export default function MyBookings() {
         setBookings((data as Booking[]) || []);
         setLoading(false);
       });
-  }, [user]);
+  };
+
+  useEffect(() => { fetchBookings(); }, [user]);
 
   if (loading) {
     return (
@@ -77,7 +83,7 @@ export default function MyBookings() {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <Card key={b.id} className="border shadow-card">
+            <Card key={b.id} className="border shadow-card hover:shadow-elevated transition-all cursor-pointer" onClick={() => setSelectedBooking(b)}>
               <CardContent className="flex items-center justify-between p-5">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -102,17 +108,22 @@ export default function MyBookings() {
                     )}
                   </div>
                 </div>
-                <div className="text-right">
-                  {b.total_amount && (
-                    <div className="font-display font-semibold text-foreground">₹{b.total_amount.toLocaleString('en-IN')}</div>
-                  )}
-                  <div className="text-xs text-muted-foreground capitalize">{b.payment_status}</div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    {b.total_amount && (
+                      <div className="font-display font-semibold text-foreground">₹{b.total_amount.toLocaleString('en-IN')}</div>
+                    )}
+                    <div className="text-xs text-muted-foreground capitalize">{b.payment_status}</div>
+                  </div>
+                  <Eye className="h-4 w-4 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <BookingDetailDialog booking={selectedBooking} open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)} onUpdate={fetchBookings} />
     </div>
   );
 }

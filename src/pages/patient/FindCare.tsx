@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { Search, Star, MapPin, Clock, CheckCircle, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ProviderProfileDialog from '@/components/care/ProviderProfileDialog';
 
 interface Provider {
   id: string;
@@ -18,10 +19,12 @@ interface Provider {
   languages: string[] | null;
   hourly_rate: number | null;
   daily_rate: number | null;
+  weekly_rate: number | null;
   rating: number | null;
   review_count: number | null;
   bio: string | null;
   is_available: boolean | null;
+  skills: string[] | null;
 }
 
 interface ServiceCategory {
@@ -30,12 +33,19 @@ interface ServiceCategory {
   slug: string;
 }
 
+const providerTypeLabel = (type: string) => {
+  const map: Record<string, string> = { nurse: 'Nurse', caregiver: 'Caregiver', companion: 'Companion', nanny: 'Nanny', helper: 'Helper', physiotherapist: 'Physiotherapist' };
+  return map[type] || type;
+};
+
 export default function FindCare() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [profileProvider, setProfileProvider] = useState<Provider | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,18 +59,17 @@ export default function FindCare() {
     });
   }, []);
 
+  const providerTypes = [...new Set(providers.map(p => p.provider_type))];
+
   const filtered = providers.filter((p) => {
     const matchesSearch = !searchTerm ||
       p.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.specializations?.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      p.provider_type.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+      p.provider_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.qualification?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === 'all' || p.provider_type === selectedType;
+    return matchesSearch && matchesType;
   });
-
-  const providerTypeLabel = (type: string) => {
-    const map: Record<string, string> = { nurse: 'Nurse', caregiver: 'Caregiver', companion: 'Companion', nanny: 'Nanny', helper: 'Helper', physiotherapist: 'Physiotherapist' };
-    return map[type] || type;
-  };
 
   return (
     <div className="space-y-6">
@@ -73,8 +82,19 @@ export default function FindCare() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search by specialization, type..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <Input placeholder="Search by specialization, qualification..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {providerTypes.map((t) => (
+              <SelectItem key={t} value={t}>{providerTypeLabel(t)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="All Categories" />
@@ -88,6 +108,8 @@ export default function FindCare() {
         </Select>
       </div>
 
+      <p className="text-sm text-muted-foreground">{filtered.length} provider{filtered.length !== 1 ? 's' : ''} found</p>
+
       {/* Results */}
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -97,12 +119,14 @@ export default function FindCare() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-16 text-center">
-          <p className="text-muted-foreground">No providers found. Try adjusting your search.</p>
+          <Filter className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+          <p className="font-semibold text-foreground">No providers found</p>
+          <p className="text-sm text-muted-foreground mt-1">Try adjusting your search or filters.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {filtered.map((p) => (
-            <Card key={p.id} className="border shadow-card transition-all hover:shadow-elevated">
+            <Card key={p.id} className="border shadow-card transition-all hover:shadow-elevated cursor-pointer" onClick={() => setProfileProvider(p)}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -114,7 +138,7 @@ export default function FindCare() {
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{p.qualification} · {p.years_experience} yrs exp</p>
                   </div>
-                  {p.rating && (
+                  {p.rating != null && p.rating > 0 && (
                     <div className="flex items-center gap-1 text-sm font-medium text-warning">
                       <Star className="h-4 w-4 fill-warning" /> {p.rating}
                       <span className="text-xs text-muted-foreground">({p.review_count})</span>
@@ -148,7 +172,7 @@ export default function FindCare() {
                       </span>
                     )}
                   </div>
-                  <Button size="sm" onClick={() => navigate(`/patient/book?provider=${p.id}`)}>
+                  <Button size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/patient/book?provider=${p.id}`); }}>
                     Book Now
                   </Button>
                 </div>
@@ -157,6 +181,8 @@ export default function FindCare() {
           ))}
         </div>
       )}
+
+      <ProviderProfileDialog provider={profileProvider} open={!!profileProvider} onOpenChange={(open) => !open && setProfileProvider(null)} />
     </div>
   );
 }
