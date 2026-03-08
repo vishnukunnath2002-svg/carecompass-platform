@@ -1,5 +1,6 @@
 import PortalLayout from '@/components/layouts/PortalLayout';
 import { StatCard } from '@/components/shared/StatCard';
+import ProfileCompletion from '@/components/provider/ProfileCompletion';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, User, FileText, CalendarDays, CheckCircle, Activity,
@@ -26,6 +27,7 @@ function ProviderDashboard() {
         <h2 className="font-display text-2xl font-bold text-foreground">Welcome, Nurse Priya 👩‍⚕️</h2>
         <p className="text-sm text-muted-foreground">Your bookings, earnings, and profile at a glance.</p>
       </div>
+      <ProfileCompletion />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Active Bookings" value={3} subtitle="1 starting in 2 hrs" icon={CalendarDays} />
         <StatCard title="Verification" value="Verified" subtitle="All documents approved" icon={CheckCircle} />
