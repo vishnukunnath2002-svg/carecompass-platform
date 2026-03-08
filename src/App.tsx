@@ -37,6 +37,7 @@ import ReviewsPage from "./pages/patient/ReviewsPage";
 import NotificationsPage from "./pages/patient/NotificationsPage";
 import MyProfile from "./pages/patient/MyProfile";
 import CheckoutPage from "./pages/patient/CheckoutPage";
+import MyOrders from "./pages/patient/MyOrders";
 
 // Admin pages
 import TenantsPage from "./pages/admin/TenantsPage";
@@ -170,6 +171,7 @@ const App = () => (
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<MyProfile />} />
               <Route path="checkout" element={<CheckoutPage />} />
+              <Route path="orders" element={<MyOrders />} />
             </Route>
 
             {/* Agency Portal */}

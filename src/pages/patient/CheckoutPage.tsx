@@ -166,7 +166,8 @@ export default function CheckoutPage() {
         <h2 className="font-display text-2xl font-bold text-foreground">Order Placed!</h2>
         <p className="text-muted-foreground mt-2">Order #{orderNumber}</p>
         <p className="text-sm text-muted-foreground mt-1 text-center max-w-md">Your order is confirmed. You'll receive status updates via notifications.</p>
-        <div className="flex gap-3 mt-8">
+         <div className="flex gap-3 mt-8">
+          <Button variant="outline" onClick={() => navigate('/patient/orders')}>Track Orders</Button>
           <Button variant="outline" onClick={() => navigate('/patient/invoices')}>View Invoices</Button>
           <Button className="gradient-primary border-0" onClick={() => navigate('/patient/shop')}>Continue Shopping</Button>
         </div>
