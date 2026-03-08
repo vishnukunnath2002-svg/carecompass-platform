@@ -138,6 +138,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/renew" element={<SubscriptionRenewal />} />
+            <Route path="/agency/:slug" element={<AgencyProfile />} />
 
             {/* Registration */}
             <Route path="/register" element={<RegisterSelect />} />

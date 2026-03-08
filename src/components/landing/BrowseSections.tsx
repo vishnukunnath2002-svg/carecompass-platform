@@ -414,6 +414,7 @@ interface AgencyTenant {
   contact_phone: string | null;
   website: string | null;
   address_line1: string | null;
+  domain_slug: string | null;
   status: string;
 }
 
