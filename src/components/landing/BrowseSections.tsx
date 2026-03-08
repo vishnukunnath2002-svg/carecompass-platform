@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Package, Star, ShoppingCart, MapPin, Store, Search, Navigation } from 'lucide-react';
+import { Package, Star, ShoppingCart, MapPin, Store, Search, Navigation, CheckCircle, Clock } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import ServiceDetailDialog from '@/components/care/ServiceDetailDialog';
 
 interface AgencyService {
   id: string;
@@ -16,9 +18,12 @@ interface AgencyService {
   service_type: string;
   price_hourly: number | null;
   price_daily: number | null;
+  price_weekly: number | null;
   conditions_served: string[];
   rating: number | null;
   review_count: number | null;
+  assigned_staff: string[] | null;
+  equipment_suggestions: string[] | null;
   tenant_id: string;
 }
 
@@ -66,9 +71,12 @@ export function BrowseServicesSection() {
   const [services, setServices] = useState<AgencyService[]>([]);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [selectedService, setSelectedService] = useState<AgencyService | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.from('agency_services').select('id, name, description, service_type, price_hourly, price_daily, conditions_served, rating, review_count, tenant_id')
+    supabase.from('agency_services').select('id, name, description, service_type, price_hourly, price_daily, price_weekly, conditions_served, rating, review_count, assigned_staff, equipment_suggestions, tenant_id')
       .eq('is_active', true).limit(12).then(({ data }) => {
         if (data) setServices(data as AgencyService[]);
       });
@@ -83,6 +91,15 @@ export function BrowseServicesSection() {
     return matchSearch && matchType;
   }), [services, search, typeFilter]);
 
+  const handleBook = (e: React.MouseEvent, serviceId: string) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate(`/auth?redirect=${encodeURIComponent(`/patient/book?service=${serviceId}`)}`);
+    } else {
+      navigate(`/patient/book?service=${serviceId}`);
+    }
+  };
+
   if (services.length === 0) return null;
 
   return (
@@ -93,7 +110,7 @@ export function BrowseServicesSection() {
             <h2 className="font-display text-2xl font-bold text-foreground">Browse Care Services</h2>
             <p className="text-sm text-muted-foreground mt-1">Verified healthcare services from registered agencies</p>
           </div>
-          <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
+          <Link to="/patient/find-care"><Button variant="outline">View All</Button></Link>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row mb-6">
@@ -110,38 +127,76 @@ export function BrowseServicesSection() {
           </Select>
         </div>
 
+        <p className="text-sm text-muted-foreground mb-4">{filtered.length} service{filtered.length !== 1 ? 's' : ''} found</p>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.slice(0, 6).map(s => (
-            <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-shadow cursor-pointer">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <Badge className="bg-primary/10 text-primary border-primary/20">{typeLabel[s.service_type] || s.service_type}</Badge>
+            <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-all cursor-pointer" onClick={() => setSelectedService(s)}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-display font-semibold text-foreground">{s.name}</h3>
+                      <Badge variant="secondary" className="bg-success/10 text-success text-xs">
+                        <CheckCircle className="mr-1 h-3 w-3" /> Verified
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{typeLabel[s.service_type] || s.service_type}</p>
+                  </div>
                   {(s.rating ?? 0) > 0 && (
-                    <span className="flex items-center gap-1 text-sm">
-                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />{s.rating}
-                      <span className="text-muted-foreground text-xs">({s.review_count || 0})</span>
-                    </span>
+                    <div className="flex items-center gap-1 text-sm font-medium text-warning">
+                      <Star className="h-4 w-4 fill-warning" /> {s.rating}
+                      <span className="text-xs text-muted-foreground">({s.review_count || 0})</span>
+                    </div>
                   )}
                 </div>
-                <p className="font-semibold text-foreground">{s.name}</p>
-                {s.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{s.description}</p>}
+
+                {s.description && <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{s.description}</p>}
+
                 {s.conditions_served?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {s.conditions_served.slice(0, 3).map(c => <Badge key={c} variant="outline" className="text-xs">{c}</Badge>)}
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {s.conditions_served.slice(0, 3).map(c => (
+                      <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                    ))}
+                    {s.conditions_served.length > 3 && (
+                      <Badge variant="outline" className="text-xs">+{s.conditions_served.length - 3}</Badge>
+                    )}
                   </div>
                 )}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex gap-2">
-                    {s.price_hourly && <span className="font-bold text-foreground">₹{s.price_hourly}/hr</span>}
-                    {s.price_daily && <span className="text-sm text-muted-foreground">₹{s.price_daily}/day</span>}
+
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    {s.assigned_staff && s.assigned_staff.length > 0 && (
+                      <span className="flex items-center gap-1 text-xs">
+                        <CheckCircle className="h-3.5 w-3.5 text-success" /> {s.assigned_staff.length} staff
+                      </span>
+                    )}
+                    {s.price_hourly && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" /> ₹{s.price_hourly}/hr
+                      </span>
+                    )}
+                    {s.price_daily && !s.price_hourly && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" /> ₹{s.price_daily}/day
+                      </span>
+                    )}
                   </div>
-                  <Link to="/auth"><Button size="sm">Book Now</Button></Link>
+                  <Button size="sm" onClick={(e) => handleBook(e, s.id)}>
+                    Book Now
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
+
+      <ServiceDetailDialog
+        service={selectedService}
+        open={!!selectedService}
+        onOpenChange={(open) => !open && setSelectedService(null)}
+      />
     </section>
   );
 }
@@ -180,7 +235,7 @@ export function ShopProductsSection() {
             <h2 className="font-display text-2xl font-bold text-foreground">Shop Medical Equipment</h2>
             <p className="text-sm text-muted-foreground mt-1">Certified products from verified vendors</p>
           </div>
-          <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
+          <Link to="/patient/shop"><Button variant="outline">View All</Button></Link>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row mb-6">
@@ -278,7 +333,7 @@ export function NearbyPharmaciesSection() {
             <h2 className="font-display text-2xl font-bold text-foreground">Nearby Pharmacies</h2>
             <p className="text-sm text-muted-foreground mt-1">Order medicines from verified local pharmacies</p>
           </div>
-          <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
+          <Link to="/patient/nearby-stores"><Button variant="outline">View All</Button></Link>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row mb-6">
