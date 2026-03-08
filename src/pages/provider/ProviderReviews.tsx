@@ -11,9 +11,14 @@ export default function ProviderReviews() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('reviews').select('*').eq('target_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
+    // Reviews target the caregiver_profile id, not user id — fetch profile first
+    const fetchReviews = async () => {
+      const { data: profile } = await supabase.from('caregiver_profiles').select('id').eq('user_id', user.id).limit(1).single();
+      if (!profile) return;
+      const { data } = await supabase.from('reviews').select('*').eq('target_id', profile.id).order('created_at', { ascending: false });
       if (data) setReviews(data);
-    });
+    };
+    fetchReviews();
   }, [user]);
 
   return (
@@ -33,9 +38,8 @@ export default function ProviderReviews() {
                   <Star className="h-4 w-4 fill-warning text-warning" /><span className="font-bold text-sm">{r.rating}</span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">{r.title || 'Patient Review'}</p>
-                  {r.comment && <p className="text-sm text-muted-foreground mt-1">{r.comment}</p>}
-                  <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.created_at), 'dd MMM yyyy')}</p>
+                  <p className="text-sm text-foreground">{r.comment || 'No comment'}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{format(new Date(r.created_at), 'dd MMM yyyy')}</p>
                 </div>
               </CardContent>
             </Card>
