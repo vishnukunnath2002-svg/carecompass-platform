@@ -1,11 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Package, Star, ShoppingCart, MapPin, Store } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Package, Star, ShoppingCart, MapPin, Store, Search, Navigation } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
+
+interface AgencyService {
+  id: string;
+  name: string;
+  description: string | null;
+  service_type: string;
+  price_hourly: number | null;
+  price_daily: number | null;
+  conditions_served: string[];
+  rating: number | null;
+  review_count: number | null;
+  tenant_id: string;
+}
 
 interface Product {
   id: string;
@@ -16,6 +31,7 @@ interface Product {
   rating: number | null;
   tenant_id: string;
   is_prescription_required: boolean | null;
+  category_id: string | null;
 }
 
 interface StoreProfile {
@@ -24,59 +40,101 @@ interface StoreProfile {
   owner_name: string | null;
   rating: number | null;
   delivery_available: boolean | null;
+  lat: number | null;
+  lng: number | null;
 }
 
-interface ServiceProvider {
+interface ProductCategory {
   id: string;
-  provider_type: string;
-  qualification: string | null;
-  specializations: string[] | null;
-  hourly_rate: number | null;
-  rating: number | null;
-  review_count: number | null;
+  name: string;
+}
+
+const typeLabel: Record<string, string> = {
+  nurse: 'Home Nurse', caregiver: 'Caregiver', companion: 'Companion',
+  nanny: 'Baby Care', helper: 'Helper', physiotherapist: 'Physiotherapist',
+};
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 export function BrowseServicesSection() {
-  const [providers, setProviders] = useState<ServiceProvider[]>([]);
+  const [services, setServices] = useState<AgencyService[]>([]);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+
   useEffect(() => {
-    supabase.from('caregiver_profiles').select('id, provider_type, qualification, specializations, hourly_rate, rating, review_count')
-      .eq('verification_status', 'approved').limit(6).then(({ data }) => {
-        if (data) setProviders(data as ServiceProvider[]);
+    supabase.from('agency_services').select('id, name, description, service_type, price_hourly, price_daily, conditions_served, rating, review_count, tenant_id')
+      .eq('is_active', true).limit(12).then(({ data }) => {
+        if (data) setServices(data as AgencyService[]);
       });
   }, []);
 
-  const typeLabel: Record<string, string> = { nurse: 'Home Nurse', caregiver: 'Caregiver', companion: 'Companion', nanny: 'Baby Care', helper: 'Helper', physiotherapist: 'Physiotherapist' };
+  const types = useMemo(() => [...new Set(services.map(s => s.service_type))], [services]);
 
-  if (providers.length === 0) return null;
+  const filtered = useMemo(() => services.filter(s => {
+    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.conditions_served?.some(c => c.toLowerCase().includes(search.toLowerCase()));
+    const matchType = typeFilter === 'all' || s.service_type === typeFilter;
+    return matchSearch && matchType;
+  }), [services, search, typeFilter]);
+
+  if (services.length === 0) return null;
 
   return (
     <section className="py-16 lg:py-20">
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground">Browse Care Services</h2>
-            <p className="text-sm text-muted-foreground mt-1">Verified healthcare professionals available near you</p>
+            <p className="text-sm text-muted-foreground mt-1">Verified healthcare services from registered agencies</p>
           </div>
           <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
         </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search by name, condition..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="All Types" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {types.map(t => <SelectItem key={t} value={t}>{typeLabel[t] || t}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {providers.map(p => (
-            <Card key={p.id} className="border shadow-card hover:shadow-elevated transition-shadow cursor-pointer">
+          {filtered.slice(0, 6).map(s => (
+            <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-shadow cursor-pointer">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <Badge className="bg-primary/10 text-primary border-primary/20">{typeLabel[p.provider_type] || p.provider_type}</Badge>
-                  {p.rating != null && p.rating > 0 && (
-                    <span className="flex items-center gap-1 text-sm"><Star className="h-3.5 w-3.5 fill-warning text-warning" />{p.rating} <span className="text-muted-foreground text-xs">({p.review_count || 0})</span></span>
+                  <Badge className="bg-primary/10 text-primary border-primary/20">{typeLabel[s.service_type] || s.service_type}</Badge>
+                  {(s.rating ?? 0) > 0 && (
+                    <span className="flex items-center gap-1 text-sm">
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />{s.rating}
+                      <span className="text-muted-foreground text-xs">({s.review_count || 0})</span>
+                    </span>
                   )}
                 </div>
-                <p className="font-semibold text-foreground">{p.qualification || typeLabel[p.provider_type]}</p>
-                {p.specializations && p.specializations.length > 0 && (
+                <p className="font-semibold text-foreground">{s.name}</p>
+                {s.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{s.description}</p>}
+                {s.conditions_served?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.specializations.slice(0, 3).map(s => <Badge key={s} variant="outline" className="text-xs">{s}</Badge>)}
+                    {s.conditions_served.slice(0, 3).map(c => <Badge key={c} variant="outline" className="text-xs">{c}</Badge>)}
                   </div>
                 )}
                 <div className="flex items-center justify-between mt-4">
-                  {p.hourly_rate && <span className="font-bold text-foreground">₹{p.hourly_rate}/hr</span>}
+                  <div className="flex gap-2">
+                    {s.price_hourly && <span className="font-bold text-foreground">₹{s.price_hourly}/hr</span>}
+                    {s.price_daily && <span className="text-sm text-muted-foreground">₹{s.price_daily}/day</span>}
+                  </div>
                   <Link to="/auth"><Button size="sm">Book Now</Button></Link>
                 </div>
               </CardContent>
@@ -90,29 +148,59 @@ export function BrowseServicesSection() {
 
 export function ShopProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const { addItem } = useCart();
 
   useEffect(() => {
-    supabase.from('products').select('id, name, price, mrp, brand, rating, tenant_id, is_prescription_required')
-      .eq('is_active', true).limit(8).order('rating', { ascending: false }).then(({ data }) => {
-        if (data) setProducts(data as Product[]);
-      });
+    Promise.all([
+      supabase.from('products').select('id, name, price, mrp, brand, rating, tenant_id, is_prescription_required, category_id')
+        .eq('is_active', true).limit(20).order('rating', { ascending: false }),
+      supabase.from('product_categories').select('id, name').eq('is_active', true),
+    ]).then(([pRes, cRes]) => {
+      if (pRes.data) setProducts(pRes.data as Product[]);
+      if (cRes.data) setCategories(cRes.data as ProductCategory[]);
+    });
   }, []);
+
+  const filtered = useMemo(() => products.filter(p => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand?.toLowerCase().includes(search.toLowerCase());
+    const matchCat = categoryFilter === 'all' || p.category_id === categoryFilter;
+    return matchSearch && matchCat;
+  }), [products, search, categoryFilter]);
 
   if (products.length === 0) return null;
 
   return (
     <section className="bg-muted/30 py-16 lg:py-20">
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground">Shop Medical Equipment</h2>
             <p className="text-sm text-muted-foreground mt-1">Certified products from verified vendors</p>
           </div>
           <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
         </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search by name, brand..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          {categories.length > 0 && (
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="All Categories" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map(p => (
+          {filtered.slice(0, 8).map(p => (
             <Card key={p.id} className="border shadow-card hover:shadow-elevated transition-shadow">
               <CardContent className="p-4 space-y-3">
                 <div className="flex h-24 w-full items-center justify-center rounded-lg bg-muted/50">
@@ -129,7 +217,7 @@ export function ShopProductsSection() {
                       <span className="ml-1 text-xs text-muted-foreground line-through">₹{p.mrp.toLocaleString('en-IN')}</span>
                     )}
                   </div>
-                  {p.rating != null && p.rating > 0 && (
+                  {(p.rating ?? 0) > 0 && (
                     <span className="flex items-center gap-0.5 text-xs"><Star className="h-3 w-3 fill-warning text-warning" />{p.rating}</span>
                   )}
                 </div>
@@ -149,28 +237,62 @@ export function ShopProductsSection() {
 
 export function NearbyPharmaciesSection() {
   const [pharmacies, setPharmacies] = useState<StoreProfile[]>([]);
+  const [search, setSearch] = useState('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   useEffect(() => {
-    supabase.from('medical_store_profiles').select('id, store_name, owner_name, rating, delivery_available')
-      .eq('verification_status', 'approved').limit(6).then(({ data }) => {
+    supabase.from('medical_store_profiles').select('id, store_name, owner_name, rating, delivery_available, lat, lng')
+      .eq('verification_status', 'approved').limit(12).then(({ data }) => {
         if (data) setPharmacies(data as StoreProfile[]);
       });
   }, []);
+
+  const requestLocation = () => {
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocationLoading(false); },
+      () => setLocationLoading(false),
+      { timeout: 10000 }
+    );
+  };
+
+  const sorted = useMemo(() => {
+    let list = pharmacies.filter(s => !search || s.store_name.toLowerCase().includes(search.toLowerCase()));
+    if (userLocation) {
+      list = list.map(s => ({
+        ...s,
+        _distance: s.lat && s.lng ? haversineDistance(userLocation.lat, userLocation.lng, s.lat, s.lng) : 9999,
+      })).sort((a: any, b: any) => a._distance - b._distance);
+    }
+    return list;
+  }, [pharmacies, search, userLocation]);
 
   if (pharmacies.length === 0) return null;
 
   return (
     <section className="py-16 lg:py-20">
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground">Nearby Pharmacies</h2>
             <p className="text-sm text-muted-foreground mt-1">Order medicines from verified local pharmacies</p>
           </div>
           <Link to="/auth?tab=register"><Button variant="outline">View All</Button></Link>
         </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search pharmacies..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <Button variant="outline" onClick={requestLocation} disabled={locationLoading}>
+            <Navigation className="h-4 w-4 mr-2" /> {userLocation ? 'Location Set ✓' : locationLoading ? 'Getting location...' : 'Use My Location'}
+          </Button>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pharmacies.map(s => (
+          {sorted.slice(0, 6).map(s => (
             <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-shadow cursor-pointer">
               <CardContent className="p-5">
                 <div className="flex items-center gap-3">
@@ -182,14 +304,19 @@ export function NearbyPharmaciesSection() {
                     {s.owner_name && <p className="text-xs text-muted-foreground">{s.owner_name}</p>}
                   </div>
                   <div className="text-right">
-                    {s.rating != null && s.rating > 0 && (
+                    {(s.rating ?? 0) > 0 && (
                       <span className="flex items-center gap-0.5 text-sm"><Star className="h-3.5 w-3.5 fill-warning text-warning" />{s.rating}</span>
                     )}
                     {s.delivery_available && <Badge variant="outline" className="text-xs mt-1">Delivery</Badge>}
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />Nearby</span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    {userLocation && s.lat && s.lng
+                      ? `${haversineDistance(userLocation.lat, userLocation.lng, s.lat, s.lng).toFixed(1)} km`
+                      : 'Nearby'}
+                  </span>
                   <Link to="/auth"><Button size="sm" variant="outline">Order Now</Button></Link>
                 </div>
               </CardContent>
