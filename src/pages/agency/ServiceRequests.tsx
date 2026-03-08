@@ -59,6 +59,56 @@ export default function ServiceRequests() {
 
   useEffect(() => { fetchRequests(); }, [user]);
 
+  // Real-time subscription for new service requests
+  useEffect(() => {
+    if (!user) return;
+
+    const setupRealtime = async () => {
+      const { data: tenant } = await supabase.from('tenants')
+        .select('id').eq('owner_user_id', user.id).eq('type', 'agency').single();
+      if (!tenant) return;
+
+      const channel = supabase
+        .channel('agency-service-requests')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'service_requests',
+            filter: `tenant_id=eq.${tenant.id}`,
+          },
+          (payload) => {
+            const newReq = payload.new as ServiceRequest;
+            setRequests(prev => [newReq, ...prev]);
+            toast({
+              title: '🔔 New Service Request',
+              description: `${newReq.patient_name} requested ${newReq.service_type} service`,
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'service_requests',
+            filter: `tenant_id=eq.${tenant.id}`,
+          },
+          (payload) => {
+            const updated = payload.new as ServiceRequest;
+            setRequests(prev => prev.map(r => r.id === updated.id ? updated : r));
+          }
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    };
+
+    const cleanup = setupRealtime();
+    return () => { cleanup.then(fn => fn?.()); };
+  }, [user]);
+
   const handleAction = async () => {
     if (!selectedReq || !actionType) return;
     setUpdating(true);
