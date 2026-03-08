@@ -90,6 +90,8 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const redirectParam = searchParams.get('redirect');
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -98,10 +100,15 @@ export default function Auth() {
       setLoading(false);
       toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
     } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      const path = user ? await getRedirectPath(user.id) : '/patient';
-      setLoading(false);
-      navigate(path);
+      if (redirectParam) {
+        setLoading(false);
+        navigate(redirectParam);
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        const path = user ? await getRedirectPath(user.id) : '/patient';
+        setLoading(false);
+        navigate(path);
+      }
     }
   };
 
