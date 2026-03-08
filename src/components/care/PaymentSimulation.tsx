@@ -7,7 +7,7 @@ import { CreditCard, Wallet, Banknote, Shield, CheckCircle, Loader2 } from 'luci
 
 interface Props {
   amount: number;
-  onPaymentComplete: () => void;
+  onPaymentComplete: (method?: string) => void;
   onBack: () => void;
   loading: boolean;
 }
