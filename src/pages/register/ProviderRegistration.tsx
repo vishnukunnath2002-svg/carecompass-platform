@@ -7,10 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import MultiStepForm from '@/components/registration/MultiStepForm';
+import FeatureTour from '@/components/registration/FeatureTour';
+import PlanSelector from '@/components/registration/PlanSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const steps = [
+  { title: 'Choose Plan', description: 'Select a subscription plan.' },
   { title: 'Provider Type', description: 'What type of care do you provide?' },
   { title: 'Personal Details', description: 'Your personal information.' },
   { title: 'Professional Details', description: 'Qualifications and experience.' },
@@ -29,7 +33,9 @@ const providerTypes = [
 ];
 
 export default function ProviderRegistration() {
+  const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
+    planId: '' as string | null,
     providerType: '', fullName: '', phone: '', email: '', password: '', gender: '',
     dob: '', address: '', city: '', state: '', pincode: '', languages: '', workingAreas: '',
     qualification: '', regNumber: '', experience: '', skills: '', specializations: '',
@@ -49,20 +55,51 @@ export default function ProviderRegistration() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const { error } = await signUp(form.email, form.password, { full_name: form.fullName, phone: form.phone, registration_type: 'provider', provider_type: form.providerType });
-    setIsSubmitting(false);
     if (error) {
+      setIsSubmitting(false);
       toast({ title: 'Registration failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Application submitted!', description: 'We will verify your documents and activate your profile.' });
-      navigate('/auth');
+      return;
     }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      try {
+        await supabase.functions.invoke('provision-tenant', {
+          body: {
+            user_id: user.id,
+            plan_id: form.planId,
+            tenant_name: form.fullName,
+            tenant_type: 'provider',
+            domain_slug: form.fullName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            contact_email: form.email,
+            contact_phone: form.phone,
+            city: form.city,
+            state: form.state,
+            pincode: form.pincode,
+          },
+        });
+      } catch (e) {
+        console.error('Tenant provisioning error:', e);
+      }
+    }
+
+    setIsSubmitting(false);
+    toast({ title: 'Application submitted!', description: 'We will verify your documents and activate your profile.' });
+    navigate('/auth');
   };
+
+  if (showTour) {
+    return <FeatureTour role="provider" onComplete={() => setShowTour(false)} />;
+  }
 
   return (
     <MultiStepForm title="Individual Provider Registration" steps={steps} onSubmit={handleSubmit} isSubmitting={isSubmitting}>
       {(step, next, prev) => (
         <div className="space-y-4">
           {step === 0 && (
+            <PlanSelector selectedPlanId={form.planId} onSelect={(id) => update('planId', id)} />
+          )}
+          {step === 1 && (
             <div className="grid gap-3 sm:grid-cols-2">
               {providerTypes.map((t) => (
                 <button key={t.value} onClick={() => update('providerType', t.value)}
@@ -72,7 +109,7 @@ export default function ProviderRegistration() {
               ))}
             </div>
           )}
-          {step === 1 && (
+          {step === 2 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Full Name *</Label><Input value={form.fullName} onChange={(e) => update('fullName', e.target.value)} /></div>
@@ -104,7 +141,7 @@ export default function ProviderRegistration() {
               </div>
             </>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Qualification</Label><Input value={form.qualification} onChange={(e) => update('qualification', e.target.value)} placeholder="GNM, BSc Nursing..." /></div>
@@ -119,9 +156,9 @@ export default function ProviderRegistration() {
               </div>
             </>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <>
-              <p className="text-sm text-muted-foreground">Document uploads will be available after account creation. Please note the document numbers for now.</p>
+              <p className="text-sm text-muted-foreground">Document uploads will be available after account creation.</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Aadhaar Number</Label><Input value={form.aadhaarFront} onChange={(e) => update('aadhaarFront', e.target.value)} /></div>
                 <div className="space-y-2"><Label>PAN / Voter ID</Label><Input value={form.panVoter} onChange={(e) => update('panVoter', e.target.value)} /></div>
@@ -131,7 +168,7 @@ export default function ProviderRegistration() {
               <div className="space-y-2"><Label>Nursing Certificate / Certification No.</Label><Input value={form.nursingCert} onChange={(e) => update('nursingCert', e.target.value)} /></div>
             </>
           )}
-          {step === 4 && (
+          {step === 5 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Available Days</Label><Input value={form.availableDays} onChange={(e) => update('availableDays', e.target.value)} placeholder="Mon-Fri, Weekends..." /></div>
