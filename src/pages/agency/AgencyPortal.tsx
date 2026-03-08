@@ -95,11 +95,53 @@ function AgencyDashboard({ subscription, isExpired, daysRemaining }: {
 }
 
 export default function AgencyPortal() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const location = useLocation();
   const { slug } = useParams();
   const basePath = slug ? `/t/${slug}/agency` : '/agency';
   const isRoot = location.pathname === basePath || location.pathname === `${basePath}/`;
   const { subscription, tenant, loading, isExpired, daysRemaining } = useTenantSubscription();
+
+  // Global real-time listener for new service requests
+  useEffect(() => {
+    if (!user) return;
+
+    const setupRealtime = async () => {
+      const { data: agencyTenant } = await supabase.from('tenants')
+        .select('id').eq('owner_user_id', user.id).eq('type', 'agency').single();
+      if (!agencyTenant) return;
+
+      const channel = supabase
+        .channel('agency-portal-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'service_requests',
+            filter: `tenant_id=eq.${agencyTenant.id}`,
+          },
+          (payload: any) => {
+            const isOnRequestsPage = window.location.pathname.includes('/service-requests');
+            if (!isOnRequestsPage) {
+              toast({
+                title: '🔔 New Service Request',
+                description: `${payload.new.patient_name} requested ${payload.new.service_type} service`,
+                action: undefined,
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    };
+
+    const cleanup = setupRealtime();
+    return () => { cleanup.then(fn => fn?.()); };
+  }, [user, toast]);
 
   // Determine which modules this agency can access based on their plan
   const planModules = subscription?.modules_included || [];
