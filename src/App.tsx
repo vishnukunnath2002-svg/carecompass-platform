@@ -140,6 +140,7 @@ const App = () => (
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
+              <Route path="modules" element={<ModulesSubscriptions />} />
               <Route path="tenants" element={<TenantsPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="onboarding" element={<OnboardingQueue />} />

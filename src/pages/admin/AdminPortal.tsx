@@ -8,6 +8,7 @@ import {
 
 const navItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
+  { title: 'Modules & Plans', url: '/admin/modules', icon: Layers },
   { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
   { title: 'Users', url: '/admin/users', icon: Users },
   { title: 'Onboarding Queue', url: '/admin/onboarding', icon: ClipboardCheck },
