@@ -146,7 +146,7 @@ export function BrowseServicesSection() {
                   </div>
                 )}
                 {/* Verified badge */}
-                <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-emerald-500/90 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white shadow-sm">
+                <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-success/90 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-success-foreground shadow-sm">
                   <CheckCircle className="h-3 w-3" /> Verified
                 </div>
               </div>
