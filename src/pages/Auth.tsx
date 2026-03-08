@@ -57,11 +57,14 @@ async function getRedirectPath(userId: string): Promise<string> {
     .select('role, tenant_id')
     .eq('user_id', userId);
   if (data && data.length > 0) {
-    const firstRole = data[0].role as string;
-    const tenantId = data[0].tenant_id;
-    const basePath = roleToPath[firstRole] || '/patient';
+    // Prefer tenant-bound roles (agency_admin, vendor_admin, etc.) over platform roles (super_admin)
+    const tenantRole = data.find((r: any) => r.tenant_id);
+    const chosen = tenantRole || data[0];
+    const role = chosen.role as string;
+    const tenantId = chosen.tenant_id;
+    const basePath = roleToPath[role] || '/patient';
     
-    // If user has a tenant, try to get domain_slug for tenant-scoped routing
+    // If user has a tenant, use tenant-scoped routing
     if (tenantId) {
       const { data: tenant } = await supabase
         .from('tenants')

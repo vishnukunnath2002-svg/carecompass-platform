@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PortalLayout from '@/components/layouts/PortalLayout';
 import { StatCard } from '@/components/shared/StatCard';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -10,24 +10,26 @@ import {
   Handshake, ArrowRightLeft
 } from 'lucide-react';
 
-const baseNavItems = [
-  { title: 'Dashboard', url: '/agency', icon: LayoutDashboard, module: null },
-  { title: 'Staff / Providers', url: '/agency/staff', icon: Users, module: 'manpower_marketplace' },
-  { title: 'Onboarding', url: '/agency/onboarding', icon: UserPlus, module: 'manpower_marketplace' },
-  { title: 'Verification', url: '/agency/verification', icon: ClipboardCheck, module: 'manpower_marketplace' },
-  { title: 'Bookings', url: '/agency/bookings', icon: CalendarDays, module: 'manpower_marketplace' },
-  { title: 'Service Catalogue', url: '/agency/services', icon: Tag, module: 'manpower_marketplace' },
-  { title: 'Pricing', url: '/agency/pricing', icon: DollarSign, module: 'manpower_marketplace' },
-  { title: 'Health Logs', url: '/agency/health-logs', icon: Heart, module: 'manpower_marketplace' },
-  { title: 'Browse Equipment', url: '/agency/equipment', icon: ShoppingBag, module: 'medical_ecommerce' },
-  { title: 'Equipment Orders', url: '/agency/inventory', icon: Package, module: 'medical_ecommerce' },
-  { title: 'Pharmacy Partners', url: '/agency/partnerships', icon: Handshake, module: 'store_connect' },
-  { title: 'Patient Referrals', url: '/agency/referrals', icon: ArrowRightLeft, module: 'store_connect' },
-  { title: 'Reviews', url: '/agency/reviews', icon: Star, module: null },
-  { title: 'Payouts', url: '/agency/payouts', icon: Wallet, module: null },
-  { title: 'Reports', url: '/agency/reports', icon: BarChart3, module: null },
-  { title: 'Settings', url: '/agency/settings', icon: Settings, module: null },
-];
+function getBaseNavItems(basePath: string) {
+  return [
+    { title: 'Dashboard', url: basePath, icon: LayoutDashboard, module: null },
+    { title: 'Staff / Providers', url: `${basePath}/staff`, icon: Users, module: 'manpower_marketplace' },
+    { title: 'Onboarding', url: `${basePath}/onboarding`, icon: UserPlus, module: 'manpower_marketplace' },
+    { title: 'Verification', url: `${basePath}/verification`, icon: ClipboardCheck, module: 'manpower_marketplace' },
+    { title: 'Bookings', url: `${basePath}/bookings`, icon: CalendarDays, module: 'manpower_marketplace' },
+    { title: 'Service Catalogue', url: `${basePath}/services`, icon: Tag, module: 'manpower_marketplace' },
+    { title: 'Pricing', url: `${basePath}/pricing`, icon: DollarSign, module: 'manpower_marketplace' },
+    { title: 'Health Logs', url: `${basePath}/health-logs`, icon: Heart, module: 'manpower_marketplace' },
+    { title: 'Browse Equipment', url: `${basePath}/equipment`, icon: ShoppingBag, module: 'medical_ecommerce' },
+    { title: 'Equipment Orders', url: `${basePath}/inventory`, icon: Package, module: 'medical_ecommerce' },
+    { title: 'Pharmacy Partners', url: `${basePath}/partnerships`, icon: Handshake, module: 'store_connect' },
+    { title: 'Patient Referrals', url: `${basePath}/referrals`, icon: ArrowRightLeft, module: 'store_connect' },
+    { title: 'Reviews', url: `${basePath}/reviews`, icon: Star, module: null },
+    { title: 'Payouts', url: `${basePath}/payouts`, icon: Wallet, module: null },
+    { title: 'Reports', url: `${basePath}/reports`, icon: BarChart3, module: null },
+    { title: 'Settings', url: `${basePath}/settings`, icon: Settings, module: null },
+  ];
+}
 
 function AgencyDashboard() {
   return (
@@ -48,7 +50,9 @@ function AgencyDashboard() {
 
 export default function AgencyPortal() {
   const location = useLocation();
-  const isRoot = location.pathname === '/agency';
+  const { slug } = useParams();
+  const basePath = slug ? `/t/${slug}/agency` : '/agency';
+  const isRoot = location.pathname === basePath || location.pathname === `${basePath}/`;
   const { user } = useAuth();
   const [modulesEnabled, setModulesEnabled] = useState<string[]>([]);
 
@@ -59,13 +63,13 @@ export default function AgencyPortal() {
         if (data?.modules_enabled) {
           setModulesEnabled(data.modules_enabled as string[]);
         } else {
-          // Default: show all modules
           setModulesEnabled(['manpower_marketplace', 'medical_ecommerce', 'store_connect']);
         }
       });
   }, [user]);
 
-  const navItems = baseNavItems.filter(item =>
+  const allNavItems = getBaseNavItems(basePath);
+  const navItems = allNavItems.filter(item =>
     item.module === null || modulesEnabled.includes(item.module)
   );
 
