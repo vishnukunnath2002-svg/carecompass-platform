@@ -178,23 +178,32 @@ export default function Auth() {
               <TabsContent value="register" className="mt-6">
                 <Card className="border shadow-card">
                   <CardHeader>
-                    <CardTitle className="font-display">Create an account</CardTitle>
-                    <CardDescription>Choose your account type after registration</CardDescription>
+                    <CardTitle className="font-display">Join CYLO</CardTitle>
+                    <CardDescription>Select your role to begin the guided registration</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleRegister} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-email">Email</Label>
-                        <Input id="reg-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-password">Password</Label>
-                        <Input id="reg-password" type="password" placeholder="Min 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
-                      </div>
-                      <Button type="submit" className="w-full gradient-primary border-0" disabled={loading}>
-                        {loading ? 'Creating account...' : 'Create Account'}
-                      </Button>
-                    </form>
+                  <CardContent className="space-y-3">
+                    {[
+                      { label: 'Patient / Family', desc: 'Book care, order medicines, shop products', icon: Users, color: 'bg-info', path: '/register/patient' },
+                      { label: 'Homecare Agency', desc: 'Manage staff, bookings & healthcare services', icon: Building2, color: 'bg-primary', path: '/register/agency' },
+                      { label: 'Individual Provider', desc: 'Nurse, caregiver or companion', icon: Stethoscope, color: 'bg-accent', path: '/register/provider' },
+                      { label: 'Medical Vendor', desc: 'Sell medical equipment & supplies', icon: ShoppingBag, color: 'bg-warning', path: '/register/vendor' },
+                      { label: 'Medical Store', desc: 'Pharmacy & local medicine delivery', icon: Store, color: 'bg-success', path: '/register/store' },
+                      { label: 'Hospital', desc: 'Procurement, RFQs & discharge care', icon: Hospital, color: 'bg-destructive', path: '/register/hospital' },
+                    ].map((role) => (
+                      <button
+                        key={role.path}
+                        onClick={() => navigate(role.path)}
+                        className="flex w-full items-center gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:shadow-elevated hover:-translate-y-0.5"
+                      >
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${role.color}`}>
+                          <role.icon className="h-5 w-5 text-primary-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-display text-sm font-semibold text-foreground">{role.label}</div>
+                          <div className="text-xs text-muted-foreground">{role.desc}</div>
+                        </div>
+                      </button>
+                    ))}
                   </CardContent>
                 </Card>
               </TabsContent>
