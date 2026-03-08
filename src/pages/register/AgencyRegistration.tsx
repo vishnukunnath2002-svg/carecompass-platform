@@ -160,9 +160,16 @@ export default function AgencyRegistration() {
               </div>
               <div className="space-y-2"><Label>Registered Address</Label><Input value={form.regAddress} onChange={(e) => update('regAddress', e.target.value)} /></div>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2"><Label>City</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} /></div>
-                <div className="space-y-2"><Label>State</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} /></div>
-                <div className="space-y-2"><Label>Pincode</Label><Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Pincode</Label>
+                  <div className="relative">
+                    <Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} placeholder="6-digit pincode" />
+                    {pincodeLookup.loading && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
+                  {pincodeLookup.error && <p className="text-xs text-destructive">{pincodeLookup.error}</p>}
+                </div>
+                <div className="space-y-2"><Label>City</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} readOnly={!!pincodeLookup.city} className={pincodeLookup.city ? 'bg-muted' : ''} /></div>
+                <div className="space-y-2"><Label>State</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} readOnly={!!pincodeLookup.state} className={pincodeLookup.state ? 'bg-muted' : ''} /></div>
               </div>
               <div className="space-y-2"><Label>Website</Label><Input value={form.website} onChange={(e) => update('website', e.target.value)} /></div>
             </>

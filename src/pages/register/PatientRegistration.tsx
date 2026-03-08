@@ -98,9 +98,16 @@ export default function PatientRegistration() {
               <div className="space-y-2"><Label>Address Line 1 *</Label><Input value={form.address1} onChange={(e) => update('address1', e.target.value)} /></div>
               <div className="space-y-2"><Label>Address Line 2</Label><Input value={form.address2} onChange={(e) => update('address2', e.target.value)} /></div>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2"><Label>City *</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} /></div>
-                <div className="space-y-2"><Label>State *</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} /></div>
-                <div className="space-y-2"><Label>Pincode *</Label><Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Pincode *</Label>
+                  <div className="relative">
+                    <Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} placeholder="6-digit pincode" />
+                    {pincodeLookup.loading && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
+                  {pincodeLookup.error && <p className="text-xs text-destructive">{pincodeLookup.error}</p>}
+                </div>
+                <div className="space-y-2"><Label>City *</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} readOnly={!!pincodeLookup.city} className={pincodeLookup.city ? 'bg-muted' : ''} /></div>
+                <div className="space-y-2"><Label>State *</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} readOnly={!!pincodeLookup.state} className={pincodeLookup.state ? 'bg-muted' : ''} /></div>
               </div>
             </>
           )}
