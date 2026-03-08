@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import MultiStepForm from '@/components/registration/MultiStepForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
+import { usePincodeAutoFill } from '@/hooks/usePincodeAutoFill';
+import { Loader2 } from 'lucide-react';
 const steps = [
   { title: 'Account', description: 'Create your login credentials.' },
   { title: 'Patient Profile', description: 'Tell us about the patient who needs care.' },
@@ -27,6 +28,14 @@ export default function PatientRegistration() {
   const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const pincodeLookup = usePincodeAutoFill(form.pincode);
+
+  useEffect(() => {
+    if (pincodeLookup.city && pincodeLookup.state) {
+      setForm(f => ({ ...f, city: pincodeLookup.city, state: pincodeLookup.state }));
+    }
+  }, [pincodeLookup.city, pincodeLookup.state]);
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
@@ -89,9 +98,16 @@ export default function PatientRegistration() {
               <div className="space-y-2"><Label>Address Line 1 *</Label><Input value={form.address1} onChange={(e) => update('address1', e.target.value)} /></div>
               <div className="space-y-2"><Label>Address Line 2</Label><Input value={form.address2} onChange={(e) => update('address2', e.target.value)} /></div>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2"><Label>City *</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} /></div>
-                <div className="space-y-2"><Label>State *</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} /></div>
-                <div className="space-y-2"><Label>Pincode *</Label><Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Pincode *</Label>
+                  <div className="relative">
+                    <Input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} placeholder="6-digit pincode" />
+                    {pincodeLookup.loading && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
+                  {pincodeLookup.error && <p className="text-xs text-destructive">{pincodeLookup.error}</p>}
+                </div>
+                <div className="space-y-2"><Label>City *</Label><Input value={form.city} onChange={(e) => update('city', e.target.value)} readOnly={!!pincodeLookup.city} className={pincodeLookup.city ? 'bg-muted' : ''} /></div>
+                <div className="space-y-2"><Label>State *</Label><Input value={form.state} onChange={(e) => update('state', e.target.value)} readOnly={!!pincodeLookup.state} className={pincodeLookup.state ? 'bg-muted' : ''} /></div>
               </div>
             </>
           )}
