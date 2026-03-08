@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
-import { Heart, LogOut, LucideIcon, AlertTriangle } from 'lucide-react';
+import { Heart, LogOut, LucideIcon, AlertTriangle, CreditCard } from 'lucide-react';
+
 import { useTenantSubscription } from '@/hooks/useTenantSubscription';
 
 interface NavItem {
@@ -64,6 +65,19 @@ function PortalSidebar({ portalName, navItems }: { portalName: string; navItems:
     </Sidebar>
   );
 }
+function SubscriptionBanner({ variant, message }: { variant: 'expired' | 'warning'; message: string }) {
+  const navigate = useNavigate();
+  const isExp = variant === 'expired';
+  return (
+    <div className={`${isExp ? 'bg-destructive/10 border-destructive/20' : 'bg-warning/10 border-warning/20'} border-b px-6 py-3 flex items-center gap-3`}>
+      <AlertTriangle className={`h-4 w-4 ${isExp ? 'text-destructive' : 'text-warning'}`} />
+      <span className={`text-sm font-medium flex-1 ${isExp ? 'text-destructive' : 'text-warning'}`}>{message}</span>
+      <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={() => navigate('/renew')}>
+        <CreditCard className="h-3.5 w-3.5" /> Renew Now
+      </Button>
+    </div>
+  );
+}
 
 export default function PortalLayout({ children, portalName, navItems }: PortalLayoutProps) {
   const { isExpired, daysRemaining } = useTenantSubscription();
@@ -83,16 +97,16 @@ export default function PortalLayout({ children, portalName, navItems }: PortalL
             </div>
           </header>
           {isExpired && (
-            <div className="bg-destructive/10 border-b border-destructive/20 px-6 py-3 flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-              <span className="text-sm font-medium text-destructive">Your subscription has expired. Please contact the administrator to renew your plan.</span>
-            </div>
+            <SubscriptionBanner
+              variant="expired"
+              message="Your subscription has expired. Renew now to continue using the platform."
+            />
           )}
           {!isExpired && daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0 && (
-            <div className="bg-warning/10 border-b border-warning/20 px-6 py-3 flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-warning" />
-              <span className="text-sm font-medium text-warning">Your subscription expires in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Contact admin to renew.</span>
-            </div>
+            <SubscriptionBanner
+              variant="warning"
+              message={`Your subscription expires in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}. Renew now to avoid interruption.`}
+            />
           )}
           <main className="flex-1 p-6">{children}</main>
         </div>
