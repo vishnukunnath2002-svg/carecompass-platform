@@ -7,7 +7,8 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
-import { Heart, LogOut, LucideIcon } from 'lucide-react';
+import { Heart, LogOut, LucideIcon, AlertTriangle } from 'lucide-react';
+import { useTenantSubscription } from '@/hooks/useTenantSubscription';
 
 interface NavItem {
   title: string;
