@@ -2,15 +2,28 @@ import { useEffect, useState } from 'react';
 import PortalLayout from '@/components/layouts/PortalLayout';
 import { StatCard } from '@/components/shared/StatCard';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenantSubscription } from '@/hooks/useTenantSubscription';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Lock, Crown } from 'lucide-react';
 import {
   LayoutDashboard, Users, ClipboardCheck, CalendarDays, Tag, DollarSign,
   Settings, BarChart3, Star, UserPlus, Wallet, Heart, ShoppingBag, Package,
   Handshake, ArrowRightLeft
 } from 'lucide-react';
 
-function getBaseNavItems(basePath: string) {
+// Basic items accessible to ALL plans
+const BASIC_MODULES = [null]; // null module = always visible
+
+interface NavItem {
+  title: string;
+  url: string;
+  icon: any;
+  module: string | null;
+}
+
+function getBaseNavItems(basePath: string): NavItem[] {
   return [
     { title: 'Dashboard', url: basePath, icon: LayoutDashboard, module: null },
     { title: 'Staff / Providers', url: `${basePath}/staff`, icon: Users, module: 'homecare' },
@@ -31,13 +44,43 @@ function getBaseNavItems(basePath: string) {
   ];
 }
 
-function AgencyDashboard() {
+function AgencyDashboard({ subscription, isExpired, daysRemaining }: {
+  subscription: any;
+  isExpired: boolean;
+  daysRemaining: number | null;
+}) {
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold text-foreground">CYLO Healthcare Agency</h2>
-        <p className="text-sm text-muted-foreground">Manage your team, bookings, and operations.</p>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-foreground">Agency Dashboard</h2>
+          <p className="text-sm text-muted-foreground">Manage your team, bookings, and operations.</p>
+        </div>
+        {subscription && (
+          <Badge variant="outline" className="text-xs gap-1">
+            <Crown className="h-3 w-3" />
+            {subscription.plan_name || 'Active Plan'}
+            {subscription.is_trial && ' (Trial)'}
+          </Badge>
+        )}
       </div>
+
+      {isExpired && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            Your subscription has expired. Some features are restricted. Please renew to regain full access.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!isExpired && daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0 && (
+        <Alert>
+          <AlertDescription>
+            Your subscription expires in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Renew soon to avoid interruption.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Active Staff" value={24} subtitle="3 pending verification" icon={Users} />
         <StatCard title="Active Bookings" value={18} subtitle="5 starting today" icon={CalendarDays} />
@@ -53,29 +96,42 @@ export default function AgencyPortal() {
   const { slug } = useParams();
   const basePath = slug ? `/t/${slug}/agency` : '/agency';
   const isRoot = location.pathname === basePath || location.pathname === `${basePath}/`;
-  const { user } = useAuth();
-  const [modulesEnabled, setModulesEnabled] = useState<string[]>([]);
+  const { subscription, tenant, loading, isExpired, daysRemaining } = useTenantSubscription();
 
-  useEffect(() => {
-    if (!user) return;
-    supabase.from('tenants').select('modules_enabled').eq('owner_user_id', user.id).eq('type', 'agency').single()
-      .then(({ data }) => {
-        if (data?.modules_enabled) {
-          setModulesEnabled(data.modules_enabled as string[]);
-        } else {
-          setModulesEnabled(['homecare', 'ecommerce', 'store_connect']);
-        }
-      });
-  }, [user]);
+  // Determine which modules this agency can access based on their plan
+  const planModules = subscription?.modules_included || [];
+  // Map plan module keys to nav module keys
+  // Plan stores: manpower_marketplace, medical_ecommerce, store_connect
+  // Nav uses: homecare, ecommerce, store_connect
+  const moduleKeyMap: Record<string, string> = {
+    manpower_marketplace: 'homecare',
+    medical_ecommerce: 'ecommerce',
+    store_connect: 'store_connect',
+    homecare: 'homecare',
+    ecommerce: 'ecommerce',
+  };
 
+  const enabledModules = planModules.map((m: string) => moduleKeyMap[m] || m);
+
+  // If no subscription at all, show only basic items
   const allNavItems = getBaseNavItems(basePath);
-  const navItems = allNavItems.filter(item =>
-    item.module === null || modulesEnabled.includes(item.module)
-  );
+  const navItems = allNavItems.filter(item => {
+    if (item.module === null) return true; // basic items always visible
+    if (isExpired) return false; // hide module items when expired
+    return enabledModules.includes(item.module);
+  });
 
   return (
     <PortalLayout portalName="Agency Portal" navItems={navItems}>
-      {isRoot ? <AgencyDashboard /> : <Outlet />}
+      {isRoot ? (
+        <AgencyDashboard
+          subscription={subscription}
+          isExpired={isExpired}
+          daysRemaining={daysRemaining}
+        />
+      ) : (
+        <Outlet />
+      )}
     </PortalLayout>
   );
 }
