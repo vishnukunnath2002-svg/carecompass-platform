@@ -35,6 +35,14 @@ export default function StoreRegistration() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const pincodeLookup = usePincodeAutoFill(form.pincode);
+
+  useEffect(() => {
+    if (pincodeLookup.city && pincodeLookup.state) {
+      setForm(f => ({ ...f, city: pincodeLookup.city, state: pincodeLookup.state }));
+    }
+  }, [pincodeLookup.city, pincodeLookup.state]);
+
   const update = (key: string, value: any) => setForm({ ...form, [key]: value });
 
   const addProduct = () => {
