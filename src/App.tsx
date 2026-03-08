@@ -254,6 +254,70 @@ const App = () => (
               <Route path="analytics" element={<HospitalAnalytics />} />
             </Route>
 
+            {/* Tenant-scoped routes */}
+            <Route path="/t/:slug/agency/*" element={<AgencyPortal />}>
+              <Route path="staff" element={<StaffManagement />} />
+              <Route path="onboarding" element={<StaffOnboarding />} />
+              <Route path="verification" element={<VerificationTracking />} />
+              <Route path="bookings" element={<AgencyBookings />} />
+              <Route path="services" element={<ServiceCatalogue />} />
+              <Route path="pricing" element={<PricingManagement />} />
+              <Route path="health-logs" element={<HealthLogs />} />
+              <Route path="reviews" element={<AgencyReviews />} />
+              <Route path="payouts" element={<AgencyPayouts />} />
+              <Route path="reports" element={<AgencyReports />} />
+              <Route path="settings" element={<AgencySettings />} />
+              <Route path="equipment" element={<AgencyEquipment />} />
+              <Route path="inventory" element={<AgencyInventory />} />
+              <Route path="partnerships" element={<PharmacyPartnerships />} />
+              <Route path="referrals" element={<PatientReferrals />} />
+            </Route>
+            <Route path="/t/:slug/provider/*" element={<ProviderPortal />}>
+              <Route path="profile" element={<ProviderProfile />} />
+              <Route path="documents" element={<ProviderDocuments />} />
+              <Route path="verification" element={<VerificationStatus />} />
+              <Route path="availability" element={<Availability />} />
+              <Route path="bookings" element={<ProviderBookings />} />
+              <Route path="vitals" element={<VitalsNotes />} />
+              <Route path="training" element={<Training />} />
+              <Route path="earnings" element={<Earnings />} />
+              <Route path="reviews" element={<ProviderReviews />} />
+            </Route>
+            <Route path="/t/:slug/vendor/*" element={<VendorPortal />}>
+              <Route path="catalogue" element={<VendorCatalogue />} />
+              <Route path="inventory" element={<VendorInventory />} />
+              <Route path="pricing" element={<VendorPricing />} />
+              <Route path="orders" element={<VendorOrders />} />
+              <Route path="dispatch" element={<VendorDispatch />} />
+              <Route path="returns" element={<VendorReturns />} />
+              <Route path="rfq" element={<VendorRFQ />} />
+              <Route path="analytics" element={<VendorAnalytics />} />
+              <Route path="payouts" element={<VendorPayouts />} />
+              <Route path="settings" element={<VendorSettings />} />
+            </Route>
+            <Route path="/t/:slug/store/*" element={<StorePortal />}>
+              <Route path="profile" element={<StoreProfile />} />
+              <Route path="catchment" element={<CatchmentArea />} />
+              <Route path="inventory" element={<StoreInventoryPage />} />
+              <Route path="hours" element={<OperatingHours />} />
+              <Route path="prescriptions" element={<StorePrescriptions />} />
+              <Route path="orders" element={<StoreOrdersPage />} />
+              <Route path="dispatch" element={<StoreDispatch />} />
+              <Route path="analytics" element={<StoreAnalytics />} />
+              <Route path="payouts" element={<StorePayouts />} />
+              <Route path="settings" element={<StoreSettings />} />
+            </Route>
+            <Route path="/t/:slug/hospital/*" element={<HospitalPortal />}>
+              <Route path="orders" element={<BulkOrders />} />
+              <Route path="rfq" element={<HospitalRFQ />} />
+              <Route path="quotes" element={<QuoteComparison />} />
+              <Route path="po" element={<HospitalPOs />} />
+              <Route path="discharge" element={<DischargeCare />} />
+              <Route path="invoices" element={<HospitalInvoices />} />
+              <Route path="users" element={<HospitalUsers />} />
+              <Route path="analytics" element={<HospitalAnalytics />} />
+            </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
