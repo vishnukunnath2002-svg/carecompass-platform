@@ -36,6 +36,7 @@ import InvoicesPage from "./pages/patient/InvoicesPage";
 import ReviewsPage from "./pages/patient/ReviewsPage";
 import NotificationsPage from "./pages/patient/NotificationsPage";
 import MyProfile from "./pages/patient/MyProfile";
+import CheckoutPage from "./pages/patient/CheckoutPage";
 
 // Admin pages
 import TenantsPage from "./pages/admin/TenantsPage";
