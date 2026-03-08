@@ -57,7 +57,7 @@ function PortalSidebar({ portalName, navItems }: { portalName: string; navItems:
         </SidebarGroup>
       </SidebarContent>
       <div className="mt-auto border-t border-sidebar-border p-3">
-        <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground" onClick={() => signOut()}>
+        <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground" onClick={async () => { await signOut(); window.location.href = '/auth'; }}>
           <LogOut className="mr-2 h-4 w-4" />
           {!collapsed && 'Sign Out'}
         </Button>
