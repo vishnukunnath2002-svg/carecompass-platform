@@ -12,6 +12,7 @@ const navItems = [
   { title: 'My Bookings', url: '/patient/bookings', icon: CalendarDays },
   { title: 'Shop Products', url: '/patient/shop', icon: ShoppingBag },
   { title: 'My Orders', url: '/patient/orders', icon: Package },
+  { title: 'Service Requests', url: '/patient/service-requests', icon: ClipboardList },
   { title: 'Nearby Stores', url: '/patient/stores', icon: Store },
   { title: 'Health Records', url: '/patient/health', icon: Heart },
   { title: 'My Patients', url: '/patient/profiles', icon: Users },
