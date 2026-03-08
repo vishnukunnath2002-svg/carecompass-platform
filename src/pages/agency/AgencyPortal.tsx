@@ -63,7 +63,7 @@ export default function AgencyPortal() {
         if (data?.modules_enabled) {
           setModulesEnabled(data.modules_enabled as string[]);
         } else {
-          setModulesEnabled(['manpower_marketplace', 'medical_ecommerce', 'store_connect']);
+          setModulesEnabled(['homecare', 'ecommerce', 'store_connect']);
         }
       });
   }, [user]);
