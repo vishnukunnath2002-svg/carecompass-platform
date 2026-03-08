@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarDays, Star, CheckCircle, ArrowLeft } from 'lucide-react';
+import PaymentSimulation from '@/components/care/PaymentSimulation';
 
 interface Provider {
   id: string;
@@ -34,6 +35,16 @@ interface PatientProfile {
   patient_name: string;
 }
 
+interface Address {
+  id: string;
+  label: string | null;
+  address_line1: string;
+  city: string;
+  pincode: string;
+}
+
+type Step = 'details' | 'payment' | 'confirmed';
+
 export default function CreateBooking() {
   const [searchParams] = useSearchParams();
   const providerId = searchParams.get('provider');
@@ -41,33 +52,38 @@ export default function CreateBooking() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [provider, setProvider] = useState<Provider | null>(null);
+  const [step, setStep] = useState<Step>('details');
   const [providers, setProviders] = useState<Provider[]>([]);
   const [patients, setPatients] = useState<PatientProfile[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedProvider, setSelectedProvider] = useState(providerId || '');
   const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [shiftType, setShiftType] = useState('');
   const [serviceType, setServiceType] = useState('');
+  const [patientCondition, setPatientCondition] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingNumber, setBookingNumber] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
-      const [provRes, patRes] = await Promise.all([
+      const queries = [
         supabase.from('caregiver_profiles').select('*').eq('verification_status', 'approved'),
         user ? supabase.from('patient_profiles').select('id, patient_name').eq('user_id', user.id) : Promise.resolve({ data: [] }),
-      ]);
+        user ? supabase.from('addresses').select('id, label, address_line1, city, pincode').eq('user_id', user.id) : Promise.resolve({ data: [] }),
+      ];
+      const [provRes, patRes, addrRes] = await Promise.all(queries);
       setProviders((provRes.data as Provider[]) || []);
       setPatients((patRes.data as PatientProfile[]) || []);
+      setAddresses((addrRes.data as Address[]) || []);
 
       if (providerId && provRes.data) {
         const found = (provRes.data as Provider[]).find(p => p.id === providerId);
-        if (found) {
-          setProvider(found);
-          setSelectedProvider(found.id);
-        }
+        if (found) setSelectedProvider(found.id);
       }
     };
     fetchData();
@@ -77,32 +93,28 @@ export default function CreateBooking() {
 
   const calculateAmount = () => {
     if (!selectedProviderObj || !startDate) return 0;
-    if (shiftType === '24hr' && selectedProviderObj.daily_rate) {
-      const days = endDate ? Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000)) : 1;
-      return selectedProviderObj.daily_rate * days;
-    }
+    const days = endDate ? Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000)) : 1;
+    if (shiftType === '24hr' && selectedProviderObj.daily_rate) return selectedProviderObj.daily_rate * days;
     if (selectedProviderObj.hourly_rate) {
       const hours = shiftType === '12hr' ? 12 : 8;
-      const days = endDate ? Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000)) : 1;
       return selectedProviderObj.hourly_rate * hours * days;
     }
     return 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const amount = calculateAmount();
+
+  const handleProceedToPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast({ title: 'Please log in', variant: 'destructive' });
-      return;
-    }
-    if (!selectedProvider || !startDate || !shiftType) {
-      toast({ title: 'Please fill all required fields', variant: 'destructive' });
-      return;
-    }
+    if (!user) { toast({ title: 'Please log in', variant: 'destructive' }); return; }
+    if (!selectedProvider || !startDate || !shiftType) { toast({ title: 'Please fill all required fields', variant: 'destructive' }); return; }
+    setStep('payment');
+  };
+
+  const handlePaymentComplete = async () => {
     setLoading(true);
-    const amount = calculateAmount();
-    const { error } = await supabase.from('bookings').insert({
-      customer_id: user.id,
+    const { data, error } = await supabase.from('bookings').insert({
+      customer_id: user!.id,
       provider_id: selectedProviderObj?.user_id || null,
       tenant_id: selectedProviderObj?.tenant_id || null,
       start_date: startDate,
@@ -110,17 +122,44 @@ export default function CreateBooking() {
       shift_type: shiftType,
       service_type: serviceType || selectedProviderObj?.provider_type,
       patient_profile_id: selectedPatient || null,
+      patient_condition: patientCondition || null,
+      address_id: selectedAddress || null,
       notes,
       total_amount: amount,
-      status: 'pending',
-      payment_status: 'pending',
-    } as any);
+      status: 'confirmed',
+      payment_status: 'paid',
+    } as any).select().single();
+
+    if (!error && data) {
+      // Create invoice
+      await supabase.from('invoices').insert({
+        user_id: user!.id,
+        reference_id: data.id,
+        type: 'booking',
+        amount: amount,
+        tax: Math.round(amount * 0.18),
+        total: Math.round(amount * 1.18),
+      } as any);
+
+      // Create notification
+      await supabase.from('notifications').insert({
+        user_id: user!.id,
+        title: 'Booking Confirmed',
+        message: `Your booking ${data.booking_number} has been confirmed. Total: ₹${amount.toLocaleString('en-IN')}`,
+        type: 'booking',
+        link: '/patient/bookings',
+      });
+
+      setBookingId(data.id);
+      setBookingNumber(data.booking_number);
+    }
+
     setLoading(false);
     if (error) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
+      setStep('details');
     } else {
-      toast({ title: 'Booking created!', description: 'Your booking has been placed successfully.' });
-      navigate('/patient/bookings');
+      setStep('confirmed');
     }
   };
 
@@ -128,6 +167,39 @@ export default function CreateBooking() {
     const map: Record<string, string> = { nurse: 'Nurse', caregiver: 'Caregiver', companion: 'Companion', nanny: 'Nanny', helper: 'Helper', physiotherapist: 'Physiotherapist' };
     return map[type] || type;
   };
+
+  if (step === 'confirmed') {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="rounded-full bg-success/10 p-6 mb-6">
+          <CheckCircle className="h-14 w-14 text-success" />
+        </div>
+        <h2 className="font-display text-2xl font-bold text-foreground">Booking Confirmed!</h2>
+        <p className="text-muted-foreground mt-2">Booking #{bookingNumber}</p>
+        <p className="text-sm text-muted-foreground mt-1 max-w-md text-center">
+          Your care provider has been notified and will confirm availability shortly. You'll receive updates via notifications.
+        </p>
+        <div className="flex gap-3 mt-8">
+          <Button variant="outline" onClick={() => navigate('/patient/bookings')}>View My Bookings</Button>
+          <Button className="gradient-primary border-0" onClick={() => navigate('/patient/find-care')}>Book More Care</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'payment') {
+    return (
+      <div className="max-w-md mx-auto space-y-6">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => setStep('details')}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back
+          </Button>
+          <h2 className="font-display text-xl font-bold text-foreground">Complete Payment</h2>
+        </div>
+        <PaymentSimulation amount={amount} onPaymentComplete={handlePaymentComplete} onBack={() => setStep('details')} loading={loading} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -141,24 +213,19 @@ export default function CreateBooking() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
+      <form onSubmit={handleProceedToPayment} className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           {/* Provider Selection */}
           <Card className="border shadow-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Select Provider</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Select Provider</CardTitle></CardHeader>
             <CardContent>
               {providers.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No verified providers available.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-80 overflow-y-auto">
                   {providers.map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={() => setSelectedProvider(p.id)}
-                      className={`cursor-pointer rounded-xl border p-4 transition-all ${selectedProvider === p.id ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/30'}`}
-                    >
+                    <div key={p.id} onClick={() => setSelectedProvider(p.id)}
+                      className={`cursor-pointer rounded-xl border p-4 transition-all ${selectedProvider === p.id ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/30'}`}>
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-2">
@@ -168,9 +235,14 @@ export default function CreateBooking() {
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">{p.qualification} · {p.years_experience} yrs</p>
+                          {p.specializations && p.specializations.length > 0 && (
+                            <div className="mt-1.5 flex flex-wrap gap-1">
+                              {p.specializations.slice(0, 3).map(s => <Badge key={s} variant="outline" className="text-xs">{s}</Badge>)}
+                            </div>
+                          )}
                         </div>
                         <div className="text-right">
-                          {p.rating && (
+                          {p.rating != null && p.rating > 0 && (
                             <div className="flex items-center gap-1 text-sm text-warning">
                               <Star className="h-3.5 w-3.5 fill-warning" /> {p.rating}
                             </div>
@@ -187,9 +259,7 @@ export default function CreateBooking() {
 
           {/* Booking Details */}
           <Card className="border shadow-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Booking Details</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Booking Details</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -201,7 +271,6 @@ export default function CreateBooking() {
                   <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate} />
                 </div>
               </div>
-
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Shift Type *</Label>
@@ -236,13 +305,28 @@ export default function CreateBooking() {
                   <Select value={selectedPatient} onValueChange={setSelectedPatient}>
                     <SelectTrigger><SelectValue placeholder="Select patient (optional)" /></SelectTrigger>
                     <SelectContent>
-                      {patients.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.patient_name}</SelectItem>
-                      ))}
+                      {patients.map((p) => <SelectItem key={p.id} value={p.id}>{p.patient_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               )}
+
+              {addresses.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Address</Label>
+                  <Select value={selectedAddress} onValueChange={setSelectedAddress}>
+                    <SelectTrigger><SelectValue placeholder="Select address (optional)" /></SelectTrigger>
+                    <SelectContent>
+                      {addresses.map((a) => <SelectItem key={a.id} value={a.id}>{a.label || 'Address'} — {a.address_line1}, {a.city}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Patient Condition</Label>
+                <Input placeholder="e.g. Post-surgery recovery, Diabetes management" value={patientCondition} onChange={(e) => setPatientCondition(e.target.value)} />
+              </div>
 
               <div className="space-y-2">
                 <Label>Notes</Label>
@@ -252,25 +336,15 @@ export default function CreateBooking() {
           </Card>
         </div>
 
-        {/* Summary */}
+        {/* Summary Sidebar */}
         <div>
           <Card className="border shadow-card sticky top-20">
-            <CardHeader>
-              <CardTitle className="text-lg">Booking Summary</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Booking Summary</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               {selectedProviderObj ? (
                 <>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Provider: </span>
-                    <span className="font-medium text-foreground">{providerTypeLabel(selectedProviderObj.provider_type)}</span>
-                  </div>
-                  {shiftType && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Shift: </span>
-                      <span className="font-medium text-foreground">{shiftType}</span>
-                    </div>
-                  )}
+                  <div className="text-sm"><span className="text-muted-foreground">Provider: </span><span className="font-medium text-foreground">{providerTypeLabel(selectedProviderObj.provider_type)}</span></div>
+                  {shiftType && <div className="text-sm"><span className="text-muted-foreground">Shift: </span><span className="font-medium text-foreground">{shiftType}</span></div>}
                   {startDate && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Dates: </span>
@@ -280,20 +354,27 @@ export default function CreateBooking() {
                       </span>
                     </div>
                   )}
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-display font-semibold text-foreground">Estimated Total</span>
-                      <span className="font-display text-xl font-bold text-foreground">₹{calculateAmount().toLocaleString('en-IN')}</span>
+                  {patientCondition && <div className="text-sm"><span className="text-muted-foreground">Condition: </span><span className="font-medium text-foreground">{patientCondition}</span></div>}
+                  <div className="border-t pt-3 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-foreground">₹{amount.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">GST (18%)</span>
+                      <span className="text-foreground">₹{Math.round(amount * 0.18).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold pt-1 border-t">
+                      <span className="text-foreground">Total</span>
+                      <span className="font-display text-xl font-bold text-foreground">₹{Math.round(amount * 1.18).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">Select a provider to see pricing.</p>
               )}
-
-              <Button type="submit" className="w-full gradient-primary border-0" disabled={loading || !selectedProvider || !startDate || !shiftType}>
-                <CalendarDays className="mr-2 h-4 w-4" />
-                {loading ? 'Placing Booking...' : 'Place Booking'}
+              <Button type="submit" className="w-full gradient-primary border-0" disabled={!selectedProvider || !startDate || !shiftType}>
+                <CalendarDays className="mr-2 h-4 w-4" /> Proceed to Payment
               </Button>
             </CardContent>
           </Card>
