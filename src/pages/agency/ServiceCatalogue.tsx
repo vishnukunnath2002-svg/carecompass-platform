@@ -264,9 +264,11 @@ export default function ServiceCatalogue() {
             </div>
 
             {/* Staff Assignment */}
-            {staff.length > 0 && (
-              <div className="space-y-2">
-                <Label>Assign Staff ({form.assigned_staff.length} selected)</Label>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Users className="h-4 w-4" /> Assign Staff ({form.assigned_staff.length} selected)
+              </Label>
+              {staff.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2 max-h-40 overflow-y-auto border rounded-lg p-3">
                   {staff.map(s => (
                     <div key={s.id} onClick={() => toggleStaff(s.id)}
@@ -276,8 +278,13 @@ export default function ServiceCatalogue() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+                  <Users className="h-5 w-5 mx-auto mb-1.5 text-muted-foreground/50" />
+                  No staff registered yet. Add care providers in <span className="font-medium text-foreground">Staff Management</span> to assign them to services.
+                </div>
+              )}
+            </div>
 
             {/* Equipment Suggestions */}
             {products.length > 0 && (

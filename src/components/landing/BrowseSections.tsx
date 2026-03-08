@@ -129,60 +129,78 @@ export function BrowseServicesSection() {
 
         <p className="text-sm text-muted-foreground mb-4">{filtered.length} service{filtered.length !== 1 ? 's' : ''} found</p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.slice(0, 6).map(s => (
-            <Card key={s.id} className="border shadow-card hover:shadow-elevated transition-all cursor-pointer" onClick={() => setSelectedService(s)}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-display font-semibold text-foreground">{s.name}</h3>
-                      <Badge variant="secondary" className="bg-success/10 text-success text-xs">
-                        <CheckCircle className="mr-1 h-3 w-3" /> Verified
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{typeLabel[s.service_type] || s.service_type}</p>
+            <Card key={s.id} className="group border-0 shadow-card hover:shadow-elevated transition-all cursor-pointer overflow-hidden rounded-2xl" onClick={() => setSelectedService(s)}>
+              {/* Gradient Banner */}
+              <div className="relative h-28 bg-gradient-to-br from-primary/80 via-primary/60 to-accent/40 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wOCI+PHBhdGggZD0iTTM2IDE4YzMuMzE0IDAgNi0yLjY4NiA2LTZzLTIuNjg2LTYtNi02LTYgMi42ODYtNiA2IDIuNjg2IDYgNiA2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                {/* Rating badge */}
+                {(s.rating ?? 0) > 0 && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-sm font-semibold shadow-sm">
+                    <Star className="h-3.5 w-3.5 fill-warning text-warning" /> {s.rating}
+                    <span className="text-xs text-muted-foreground">({s.review_count || 0})</span>
                   </div>
-                  {(s.rating ?? 0) > 0 && (
-                    <div className="flex items-center gap-1 text-sm font-medium text-warning">
-                      <Star className="h-4 w-4 fill-warning" /> {s.rating}
-                      <span className="text-xs text-muted-foreground">({s.review_count || 0})</span>
-                    </div>
-                  )}
+                )}
+                {/* Verified badge */}
+                <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-emerald-500/90 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white shadow-sm">
+                  <CheckCircle className="h-3 w-3" /> Verified
+                </div>
+              </div>
+
+              <CardContent className="p-5 space-y-3">
+                {/* Service name & type */}
+                <div>
+                  <h3 className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors">{s.name}</h3>
+                  <Badge className="mt-1.5 bg-primary/10 text-primary border-primary/20 text-xs">{typeLabel[s.service_type] || s.service_type}</Badge>
                 </div>
 
-                {s.description && <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{s.description}</p>}
+                {/* Description */}
+                {s.description && <p className="text-sm text-muted-foreground line-clamp-2">{s.description}</p>}
 
+                {/* Conditions */}
                 {s.conditions_served?.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5">
                     {s.conditions_served.slice(0, 3).map(c => (
-                      <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                      <Badge key={c} variant="outline" className="text-xs rounded-full">{c}</Badge>
                     ))}
                     {s.conditions_served.length > 3 && (
-                      <Badge variant="outline" className="text-xs">+{s.conditions_served.length - 3}</Badge>
+                      <Badge variant="outline" className="text-xs rounded-full">+{s.conditions_served.length - 3}</Badge>
                     )}
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    {s.assigned_staff && s.assigned_staff.length > 0 && (
-                      <span className="flex items-center gap-1 text-xs">
-                        <CheckCircle className="h-3.5 w-3.5 text-success" /> {s.assigned_staff.length} staff
-                      </span>
-                    )}
+                {/* Stats row */}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground border-t pt-3">
+                  {s.assigned_staff && s.assigned_staff.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5 text-primary" /> {s.assigned_staff.length} staff
+                    </span>
+                  )}
+                  {s.equipment_suggestions && s.equipment_suggestions.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Package className="h-3.5 w-3.5 text-primary" /> {s.equipment_suggestions.length} equipment
+                    </span>
+                  )}
+                </div>
+
+                {/* Price & CTA */}
+                <div className="flex items-center justify-between pt-1">
+                  <div>
                     {s.price_hourly && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" /> ₹{s.price_hourly}/hr
-                      </span>
+                      <div className="text-lg font-bold text-foreground">₹{s.price_hourly}<span className="text-xs font-normal text-muted-foreground">/hr</span></div>
                     )}
                     {s.price_daily && !s.price_hourly && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" /> ₹{s.price_daily}/day
-                      </span>
+                      <div className="text-lg font-bold text-foreground">₹{s.price_daily}<span className="text-xs font-normal text-muted-foreground">/day</span></div>
+                    )}
+                    {!s.price_hourly && !s.price_daily && s.price_weekly && (
+                      <div className="text-lg font-bold text-foreground">₹{s.price_weekly}<span className="text-xs font-normal text-muted-foreground">/wk</span></div>
                     )}
                   </div>
-                  <Button size="sm" onClick={(e) => handleBook(e, s.id)}>
+                  <Button size="sm" className="rounded-full gradient-primary border-0 shadow-sm" onClick={(e) => handleBook(e, s.id)}>
                     Book Now
                   </Button>
                 </div>
