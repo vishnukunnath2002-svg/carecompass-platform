@@ -39,6 +39,7 @@ import NotificationsPage from "./pages/patient/NotificationsPage";
 import MyProfile from "./pages/patient/MyProfile";
 import CheckoutPage from "./pages/patient/CheckoutPage";
 import MyOrders from "./pages/patient/MyOrders";
+import MyServiceRequests from "./pages/patient/MyServiceRequests";
 
 // Admin pages
 import TenantsPage from "./pages/admin/TenantsPage";
