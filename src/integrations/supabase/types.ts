@@ -263,6 +263,8 @@ export type Database = {
           id: string
           is_available: boolean | null
           languages: string[] | null
+          lat: number | null
+          lng: number | null
           preferred_areas: string[] | null
           provider_type: Database["public"]["Enums"]["provider_type"]
           qualification: string | null
@@ -296,6 +298,8 @@ export type Database = {
           id?: string
           is_available?: boolean | null
           languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
           preferred_areas?: string[] | null
           provider_type: Database["public"]["Enums"]["provider_type"]
           qualification?: string | null
@@ -329,6 +333,8 @@ export type Database = {
           id?: string
           is_available?: boolean | null
           languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
           preferred_areas?: string[] | null
           provider_type?: Database["public"]["Enums"]["provider_type"]
           qualification?: string | null
@@ -1653,6 +1659,117 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          commission_override: number | null
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          is_free_trial: boolean
+          max_listings: number | null
+          max_users: number | null
+          module: string
+          name: string
+          price_monthly: number
+          price_yearly: number
+          slug: string
+          sort_order: number | null
+          trial_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          commission_override?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          is_free_trial?: boolean
+          max_listings?: number | null
+          max_users?: number | null
+          module: string
+          name: string
+          price_monthly?: number
+          price_yearly?: number
+          slug: string
+          sort_order?: number | null
+          trial_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          commission_override?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          is_free_trial?: boolean
+          max_listings?: number | null
+          max_users?: number | null
+          module?: string
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          slug?: string
+          sort_order?: number | null
+          trial_days?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tenant_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_trial: boolean
+          plan_id: string
+          started_at: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_trial?: boolean
+          plan_id: string
+          started_at?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_trial?: boolean
+          plan_id?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           address_line1: string | null
@@ -1666,6 +1783,8 @@ export type Database = {
           feature_config: Json | null
           gst_number: string | null
           id: string
+          lat: number | null
+          lng: number | null
           logo_url: string | null
           modules_enabled: Json | null
           name: string
@@ -1690,6 +1809,8 @@ export type Database = {
           feature_config?: Json | null
           gst_number?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           modules_enabled?: Json | null
           name: string
@@ -1714,6 +1835,8 @@ export type Database = {
           feature_config?: Json | null
           gst_number?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           modules_enabled?: Json | null
           name?: string
