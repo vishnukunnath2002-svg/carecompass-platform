@@ -184,12 +184,14 @@ export default function CreateBooking() {
 
   // Product recommendations based on patient condition
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [pharmacySuggestions, setPharmacySuggestions] = useState<any[]>([]);
   const { addItem } = useCart();
 
   useEffect(() => {
     if (step !== 'confirmed' || !patientCondition) return;
     const conditionKeywords = patientCondition.toLowerCase().split(/[\s,]+/).filter(w => w.length > 3);
     if (conditionKeywords.length === 0) return;
+    
     supabase.from('products').select('*').eq('is_active', true).limit(50).then(({ data }) => {
       if (!data) return;
       const scored = data.map(p => {
@@ -198,6 +200,15 @@ export default function CreateBooking() {
         return { ...p, score };
       }).filter(p => p.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
       setRecommendations(scored);
+
+      // If any recommended products are out of stock, suggest nearby pharmacies
+      const outOfStock = scored.filter(p => (p.stock_quantity ?? 0) <= 0);
+      if (outOfStock.length > 0) {
+        supabase.from('medical_store_profiles').select('id, store_name, owner_name, rating, delivery_available, tenant_id')
+          .eq('verification_status', 'approved').limit(3).then(({ data: stores }) => {
+            if (stores && stores.length > 0) setPharmacySuggestions(stores);
+          });
+      }
     });
   }, [step, patientCondition]);
 
