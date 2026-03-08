@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Store, Star, MapPin, Clock, Truck, CheckCircle, Search, ShoppingBag, Package, ShoppingCart, Upload, ArrowLeft } from 'lucide-react';
+import { Store, Star, MapPin, Clock, Truck, CheckCircle, Search, ShoppingBag, Package, ShoppingCart, Upload, Navigation } from 'lucide-react';
 
 interface StoreProfile {
   id: string;
@@ -23,6 +23,8 @@ interface StoreProfile {
   operating_hours: any;
   catchment_radius_km: number | null;
   tenant_id: string;
+  lat: number | null;
+  lng: number | null;
 }
 
 interface StoreItem {
@@ -36,13 +38,24 @@ interface StoreItem {
   store_id: string;
 }
 
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function NearbyStores() {
   const [stores, setStores] = useState<StoreProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStore, setSelectedStore] = useState<StoreProfile | null>(null);
   const [storeItems, setStoreItems] = useState<StoreItem[]>([]);
   const [itemSearch, setItemSearch] = useState('');
+  const [storeSearch, setStoreSearch] = useState('');
   const [loadingItems, setLoadingItems] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
   const { addItem, totalItems } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -54,6 +67,26 @@ export default function NearbyStores() {
       setLoading(false);
     });
   }, []);
+
+  const requestLocation = () => {
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocationLoading(false); },
+      () => { setLocationLoading(false); toast({ title: 'Location unavailable', description: 'Please enable location access.', variant: 'destructive' }); },
+      { timeout: 10000 }
+    );
+  };
+
+  const sortedStores = useMemo(() => {
+    let list = stores.filter(s => !storeSearch || s.store_name.toLowerCase().includes(storeSearch.toLowerCase()));
+    if (userLocation) {
+      list = list.map(s => ({
+        ...s,
+        _distance: s.lat && s.lng ? haversineDistance(userLocation.lat, userLocation.lng, s.lat, s.lng) : 9999,
+      })).sort((a: any, b: any) => a._distance - b._distance) as any;
+    }
+    return list;
+  }, [stores, storeSearch, userLocation]);
 
   const openStore = async (store: StoreProfile) => {
     setSelectedStore(store);
@@ -117,13 +150,24 @@ export default function NearbyStores() {
         </div>
       </div>
 
+      {/* Search + Location */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search stores..." className="pl-9" value={storeSearch} onChange={e => setStoreSearch(e.target.value)} />
+        </div>
+        <Button variant="outline" onClick={requestLocation} disabled={locationLoading}>
+          <Navigation className="h-4 w-4 mr-2" /> {userLocation ? 'Location Set ✓' : locationLoading ? 'Getting...' : 'Use My Location'}
+        </Button>
+      </div>
+
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2">{[1, 2].map(i => <Card key={i} className="animate-pulse"><CardContent className="h-40 p-6" /></Card>)}</div>
-      ) : stores.length === 0 ? (
-        <Card className="border"><CardContent className="flex flex-col items-center py-16"><Store className="h-12 w-12 text-muted-foreground/40" /><p className="mt-4 font-display font-semibold text-foreground">No stores nearby</p><p className="mt-1 text-sm text-muted-foreground">We're expanding to your area soon.</p></CardContent></Card>
+      ) : sortedStores.length === 0 ? (
+        <Card className="border"><CardContent className="flex flex-col items-center py-16"><Store className="h-12 w-12 text-muted-foreground/40" /><p className="mt-4 font-display font-semibold text-foreground">No stores found</p><p className="mt-1 text-sm text-muted-foreground">Try a different search or enable location.</p></CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {stores.map((s) => (
+          {sortedStores.map((s: any) => (
             <Card key={s.id} className="border shadow-card transition-all hover:shadow-elevated cursor-pointer" onClick={() => openStore(s)}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -139,7 +183,11 @@ export default function NearbyStores() {
                 </div>
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
                   {s.operating_hours?.open && <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {s.operating_hours.open} - {s.operating_hours.close}</span>}
-                  {s.catchment_radius_km && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.catchment_radius_km} km</span>}
+                  {userLocation && s._distance != null && s._distance < 9999 ? (
+                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s._distance.toFixed(1)} km</span>
+                  ) : s.catchment_radius_km ? (
+                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.catchment_radius_km} km</span>
+                  ) : null}
                   {s.delivery_available && <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> Delivery ₹{s.delivery_fee}</span>}
                 </div>
                 {s.minimum_order_value && s.minimum_order_value > 0 && <p className="mt-2 text-xs text-muted-foreground">Min order: ₹{s.minimum_order_value}</p>}
