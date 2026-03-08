@@ -7,6 +7,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import RegisterSelect from "./pages/register/RegisterSelect";
+import PatientRegistration from "./pages/register/PatientRegistration";
+import AgencyRegistration from "./pages/register/AgencyRegistration";
+import ProviderRegistration from "./pages/register/ProviderRegistration";
+import VendorRegistration from "./pages/register/VendorRegistration";
+import StoreRegistration from "./pages/register/StoreRegistration";
+import HospitalRegistration from "./pages/register/HospitalRegistration";
 import AdminPortal from "./pages/admin/AdminPortal";
 import PatientPortal from "./pages/patient/PatientPortal";
 import AgencyPortal from "./pages/agency/AgencyPortal";
@@ -28,6 +35,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+
+            {/* Registration */}
+            <Route path="/register" element={<RegisterSelect />} />
+            <Route path="/register/patient" element={<PatientRegistration />} />
+            <Route path="/register/agency" element={<AgencyRegistration />} />
+            <Route path="/register/provider" element={<ProviderRegistration />} />
+            <Route path="/register/vendor" element={<VendorRegistration />} />
+            <Route path="/register/store" element={<StoreRegistration />} />
+            <Route path="/register/hospital" element={<HospitalRegistration />} />
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
