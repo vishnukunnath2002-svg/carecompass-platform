@@ -10,7 +10,7 @@ import { Lock, Crown } from 'lucide-react';
 import {
   LayoutDashboard, Users, ClipboardCheck, CalendarDays, Tag, DollarSign,
   Settings, BarChart3, Star, UserPlus, Wallet, Heart, ShoppingBag, Package,
-  Handshake, ArrowRightLeft
+  Handshake, ArrowRightLeft, ClipboardList
 } from 'lucide-react';
 
 // Basic items accessible to ALL plans
@@ -37,6 +37,7 @@ function getBaseNavItems(basePath: string): NavItem[] {
     { title: 'Equipment Orders', url: `${basePath}/inventory`, icon: Package, module: 'ecommerce' },
     { title: 'Pharmacy Partners', url: `${basePath}/partnerships`, icon: Handshake, module: 'store_connect' },
     { title: 'Patient Referrals', url: `${basePath}/referrals`, icon: ArrowRightLeft, module: 'store_connect' },
+    { title: 'Service Requests', url: `${basePath}/service-requests`, icon: ClipboardList, module: null },
     { title: 'Reviews', url: `${basePath}/reviews`, icon: Star, module: null },
     { title: 'Payouts', url: `${basePath}/payouts`, icon: Wallet, module: null },
     { title: 'Reports', url: `${basePath}/reports`, icon: BarChart3, module: null },

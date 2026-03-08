@@ -39,6 +39,7 @@ import NotificationsPage from "./pages/patient/NotificationsPage";
 import MyProfile from "./pages/patient/MyProfile";
 import CheckoutPage from "./pages/patient/CheckoutPage";
 import MyOrders from "./pages/patient/MyOrders";
+import MyServiceRequests from "./pages/patient/MyServiceRequests";
 
 // Admin pages
 import TenantsPage from "./pages/admin/TenantsPage";
@@ -75,6 +76,7 @@ import AgencyEquipment from "./pages/agency/AgencyEquipment";
 import AgencyInventory from "./pages/agency/AgencyInventory";
 import PharmacyPartnerships from "./pages/agency/PharmacyPartnerships";
 import PatientReferrals from "./pages/agency/PatientReferrals";
+import ServiceRequests from "./pages/agency/ServiceRequests";
 
 // Provider pages
 import ProviderBookings from "./pages/provider/ProviderBookings";
@@ -182,6 +184,7 @@ const App = () => (
               <Route path="profile" element={<MyProfile />} />
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="orders" element={<MyOrders />} />
+              <Route path="service-requests" element={<MyServiceRequests />} />
             </Route>
 
             {/* Agency Portal */}
@@ -201,6 +204,7 @@ const App = () => (
               <Route path="inventory" element={<AgencyInventory />} />
               <Route path="partnerships" element={<PharmacyPartnerships />} />
               <Route path="referrals" element={<PatientReferrals />} />
+              <Route path="service-requests" element={<ServiceRequests />} />
             </Route>
 
             {/* Provider Portal */}
@@ -273,6 +277,7 @@ const App = () => (
               <Route path="inventory" element={<AgencyInventory />} />
               <Route path="partnerships" element={<PharmacyPartnerships />} />
               <Route path="referrals" element={<PatientReferrals />} />
+              <Route path="service-requests" element={<ServiceRequests />} />
             </Route>
             <Route path="/t/:slug/provider/*" element={<ProviderPortal />}>
               <Route path="profile" element={<ProviderProfile />} />

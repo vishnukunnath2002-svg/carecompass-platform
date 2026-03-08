@@ -3,7 +3,7 @@ import { StatCard } from '@/components/shared/StatCard';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Heart, Search, ShoppingBag, Store, CalendarDays,
-  FileText, Wallet, Bell, Star, User, Users, Package
+  FileText, Wallet, Bell, Star, User, Users, Package, ClipboardList
 } from 'lucide-react';
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { title: 'My Bookings', url: '/patient/bookings', icon: CalendarDays },
   { title: 'Shop Products', url: '/patient/shop', icon: ShoppingBag },
   { title: 'My Orders', url: '/patient/orders', icon: Package },
+  { title: 'Service Requests', url: '/patient/service-requests', icon: ClipboardList },
   { title: 'Nearby Stores', url: '/patient/stores', icon: Store },
   { title: 'Health Records', url: '/patient/health', icon: Heart },
   { title: 'My Patients', url: '/patient/profiles', icon: Users },
