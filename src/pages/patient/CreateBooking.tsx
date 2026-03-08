@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, Star, CheckCircle, ArrowLeft } from 'lucide-react';
+import { CalendarDays, Star, CheckCircle, ArrowLeft, ShoppingBag, Package } from 'lucide-react';
 import PaymentSimulation from '@/components/care/PaymentSimulation';
+import { useCart } from '@/contexts/CartContext';
 
 interface Provider {
   id: string;
@@ -111,7 +112,7 @@ export default function CreateBooking() {
     setStep('payment');
   };
 
-  const handlePaymentComplete = async () => {
+  const handlePaymentComplete = async (paymentMethod?: string) => {
     setLoading(true);
     const { data, error } = await supabase.from('bookings').insert({
       customer_id: user!.id,
@@ -150,6 +151,19 @@ export default function CreateBooking() {
         link: '/patient/bookings',
       });
 
+      // Record wallet debit if wallet payment
+      if (paymentMethod === 'wallet') {
+        await supabase.from('wallet_transactions').insert({
+          user_id: user!.id,
+          type: 'debit',
+          source: 'booking',
+          amount: Math.round(amount * 1.18),
+          description: `Payment for booking ${data.booking_number}`,
+          reference_type: 'booking',
+          reference_id: data.id,
+        } as any);
+      }
+
       setBookingId(data.id);
       setBookingNumber(data.booking_number);
     }
@@ -168,6 +182,25 @@ export default function CreateBooking() {
     return map[type] || type;
   };
 
+  // Product recommendations based on patient condition
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const { addItem } = useCart();
+
+  useEffect(() => {
+    if (step !== 'confirmed' || !patientCondition) return;
+    const conditionKeywords = patientCondition.toLowerCase().split(/[\s,]+/).filter(w => w.length > 3);
+    if (conditionKeywords.length === 0) return;
+    supabase.from('products').select('*').eq('is_active', true).limit(50).then(({ data }) => {
+      if (!data) return;
+      const scored = data.map(p => {
+        const text = `${p.name} ${p.description || ''} ${p.brand || ''}`.toLowerCase();
+        const score = conditionKeywords.reduce((s: number, kw: string) => s + (text.includes(kw) ? 1 : 0), 0);
+        return { ...p, score };
+      }).filter(p => p.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
+      setRecommendations(scored);
+    });
+  }, [step, patientCondition]);
+
   if (step === 'confirmed') {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -183,6 +216,38 @@ export default function CreateBooking() {
           <Button variant="outline" onClick={() => navigate('/patient/bookings')}>View My Bookings</Button>
           <Button className="gradient-primary border-0" onClick={() => navigate('/patient/find-care')}>Book More Care</Button>
         </div>
+
+        {/* Cross-module: Product Recommendations */}
+        {recommendations.length > 0 && (
+          <div className="mt-10 w-full max-w-2xl">
+            <h3 className="font-display text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+              <ShoppingBag className="h-5 w-5 text-primary" /> Recommended Products
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">Based on the patient condition you described.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {recommendations.map((p) => (
+                <Card key={p.id} className="border shadow-card">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted/50 shrink-0">
+                      <Package className="h-5 w-5 text-muted-foreground/30" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{p.name}</p>
+                      {p.brand && <p className="text-xs text-muted-foreground">{p.brand}</p>}
+                      <p className="font-bold text-foreground text-sm mt-0.5">₹{p.price.toLocaleString('en-IN')}</p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      addItem({ productId: p.id, name: p.name, price: p.price, mrp: p.mrp, brand: p.brand, tenantId: p.tenant_id, isPrescriptionRequired: !!p.is_prescription_required, source: 'vendor' });
+                    }}>
+                      Add
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Button variant="outline" className="mt-3" onClick={() => navigate('/patient/shop')}>Browse All Products →</Button>
+          </div>
+        )}
       </div>
     );
   }

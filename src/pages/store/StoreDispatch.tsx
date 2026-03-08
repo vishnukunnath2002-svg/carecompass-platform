@@ -3,17 +3,26 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Truck } from 'lucide-react';
 
 export default function StoreDispatch() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from('store_orders').select('*').in('status', ['confirmed', 'shipped']).order('created_at', { ascending: false }).then(({ data }) => {
+    if (!user) return;
+    const fetchDispatch = async () => {
+      const { data: roleData } = await supabase.from('user_roles').select('tenant_id').eq('user_id', user.id).limit(1).single();
+      if (!roleData?.tenant_id) return;
+      const { data: storeData } = await supabase.from('medical_store_profiles').select('id').eq('tenant_id', roleData.tenant_id).limit(1).single();
+      if (!storeData) return;
+      const { data } = await supabase.from('store_orders').select('*').eq('store_id', storeData.id).in('status', ['confirmed', 'dispatched']).order('created_at', { ascending: false });
       if (data) setOrders(data);
-    });
-  }, []);
+    };
+    fetchDispatch();
+  }, [user]);
 
   return (
     <div className="space-y-6">
