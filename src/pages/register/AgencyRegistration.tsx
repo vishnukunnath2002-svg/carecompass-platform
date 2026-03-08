@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,8 @@ import PaymentSimulation from '@/components/care/PaymentSimulation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
+import { usePincodeAutoFill } from '@/hooks/usePincodeAutoFill';
+import { Loader2 } from 'lucide-react';
 const steps = [
   { title: 'Choose Plan', description: 'Select a subscription plan for your agency.' },
   { title: 'Payment', description: 'Complete payment to activate your plan.' },
