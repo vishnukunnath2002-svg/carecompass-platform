@@ -152,6 +152,9 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Browse Agencies */}
+      <BrowseAgenciesSection />
+
       {/* Browse Services */}
       <BrowseServicesSection />
 
