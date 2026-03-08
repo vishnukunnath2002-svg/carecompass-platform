@@ -1886,6 +1886,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          domain_slug: string | null
           feature_config: Json | null
           gst_number: string | null
           id: string
@@ -1912,6 +1913,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          domain_slug?: string | null
           feature_config?: Json | null
           gst_number?: string | null
           id?: string
@@ -1938,6 +1940,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          domain_slug?: string | null
           feature_config?: Json | null
           gst_number?: string | null
           id?: string

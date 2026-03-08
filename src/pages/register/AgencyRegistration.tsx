@@ -6,10 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import MultiStepForm from '@/components/registration/MultiStepForm';
+import FeatureTour from '@/components/registration/FeatureTour';
+import PlanSelector from '@/components/registration/PlanSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const steps = [
+  { title: 'Choose Plan', description: 'Select a subscription plan for your agency.' },
   { title: 'Business Identity', description: 'Basic information about your agency.' },
   { title: 'Service Profile', description: 'What services does your agency offer?' },
   { title: 'Compliance & Documents', description: 'Upload required documents.' },
@@ -17,7 +21,9 @@ const steps = [
 ];
 
 export default function AgencyRegistration() {
+  const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
+    planId: '' as string | null,
     companyName: '', brandName: '', ownerName: '', phone: '', email: '', password: '',
     gst: '', regNumber: '', regAddress: '', opAddress: '', city: '', state: '', pincode: '', website: '',
     services: '', specializations: '', serviceAreas: '', staffCount: '', is247: false, shiftSupport: false, comboServices: false,
@@ -35,20 +41,54 @@ export default function AgencyRegistration() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const { error } = await signUp(form.email, form.password, { full_name: form.ownerName, phone: form.phone, registration_type: 'agency' });
-    setIsSubmitting(false);
     if (error) {
+      setIsSubmitting(false);
       toast({ title: 'Registration failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Application submitted!', description: 'Our team will review and approve your agency.' });
-      navigate('/auth');
+      return;
     }
+
+    // Get the user ID and provision tenant
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      try {
+        await supabase.functions.invoke('provision-tenant', {
+          body: {
+            user_id: user.id,
+            plan_id: form.planId,
+            tenant_name: form.companyName || form.brandName,
+            tenant_type: 'agency',
+            domain_slug: (form.brandName || form.companyName).toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            contact_email: form.email,
+            contact_phone: form.phone,
+            city: form.city,
+            state: form.state,
+            pincode: form.pincode,
+            gst_number: form.gst,
+            registration_number: form.regNumber,
+          },
+        });
+      } catch (e) {
+        console.error('Tenant provisioning error:', e);
+      }
+    }
+
+    setIsSubmitting(false);
+    toast({ title: 'Application submitted!', description: 'Your agency portal is being set up. Check your email to verify your account.' });
+    navigate('/auth');
   };
+
+  if (showTour) {
+    return <FeatureTour role="agency" onComplete={() => setShowTour(false)} />;
+  }
 
   return (
     <MultiStepForm title="Homecare Agency Registration" steps={steps} onSubmit={handleSubmit} isSubmitting={isSubmitting}>
       {(step, next, prev) => (
         <div className="space-y-4">
           {step === 0 && (
+            <PlanSelector selectedPlanId={form.planId} onSelect={(id) => update('planId', id)} />
+          )}
+          {step === 1 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Company Name *</Label><Input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} /></div>
@@ -75,7 +115,7 @@ export default function AgencyRegistration() {
               <div className="space-y-2"><Label>Website</Label><Input value={form.website} onChange={(e) => update('website', e.target.value)} /></div>
             </>
           )}
-          {step === 1 && (
+          {step === 2 && (
             <>
               <div className="space-y-2"><Label>Services Offered</Label><Textarea value={form.services} onChange={(e) => update('services', e.target.value)} placeholder="Home nursing, elder care, baby care..." /></div>
               <div className="space-y-2"><Label>Specialization Types</Label><Textarea value={form.specializations} onChange={(e) => update('specializations', e.target.value)} placeholder="Cardiac, post-surgery, neuro..." /></div>
@@ -90,7 +130,7 @@ export default function AgencyRegistration() {
               </div>
             </>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <>
               <p className="text-sm text-muted-foreground">Document upload will be available after account creation. Please have these ready.</p>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -104,7 +144,7 @@ export default function AgencyRegistration() {
               </div>
             </>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Staff Logins Needed</Label><Input type="number" value={form.staffLogins} onChange={(e) => update('staffLogins', e.target.value)} /></div>

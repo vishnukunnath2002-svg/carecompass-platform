@@ -5,10 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import MultiStepForm from '@/components/registration/MultiStepForm';
+import FeatureTour from '@/components/registration/FeatureTour';
+import PlanSelector from '@/components/registration/PlanSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const steps = [
+  { title: 'Choose Plan', description: 'Select a subscription plan for your store.' },
   { title: 'Store Profile', description: 'Basic store information.' },
   { title: 'Documents', description: 'Licence and verification.' },
   { title: 'Operations', description: 'Delivery and catchment setup.' },
@@ -16,7 +20,9 @@ const steps = [
 ];
 
 export default function StoreRegistration() {
+  const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
+    planId: '' as string | null,
     storeName: '', ownerName: '', phone: '', email: '', password: '', storeAddress: '', gst: '', drugLicence: '',
     drugLicenceCert: '', ownerIdProof: '',
     catchmentPincodes: '', catchmentRadius: '', operatingHours: '', deliveryAvailable: true, ownDeliveryStaff: false,
@@ -43,20 +49,49 @@ export default function StoreRegistration() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const { error } = await signUp(form.email, form.password, { full_name: form.ownerName, phone: form.phone, registration_type: 'medical_store' });
-    setIsSubmitting(false);
     if (error) {
+      setIsSubmitting(false);
       toast({ title: 'Registration failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Application submitted!', description: 'We will verify and activate your store.' });
-      navigate('/auth');
+      return;
     }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      try {
+        await supabase.functions.invoke('provision-tenant', {
+          body: {
+            user_id: user.id,
+            plan_id: form.planId,
+            tenant_name: form.storeName,
+            tenant_type: 'medical_store',
+            domain_slug: form.storeName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            contact_email: form.email,
+            contact_phone: form.phone,
+            gst_number: form.gst,
+          },
+        });
+      } catch (e) {
+        console.error('Tenant provisioning error:', e);
+      }
+    }
+
+    setIsSubmitting(false);
+    toast({ title: 'Application submitted!', description: 'We will verify and activate your store.' });
+    navigate('/auth');
   };
+
+  if (showTour) {
+    return <FeatureTour role="store" onComplete={() => setShowTour(false)} />;
+  }
 
   return (
     <MultiStepForm title="Medical Store Registration" steps={steps} onSubmit={handleSubmit} isSubmitting={isSubmitting}>
       {(step, next, prev) => (
         <div className="space-y-4">
           {step === 0 && (
+            <PlanSelector selectedPlanId={form.planId} onSelect={(id) => update('planId', id)} />
+          )}
+          {step === 1 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Store Name *</Label><Input value={form.storeName} onChange={(e) => update('storeName', e.target.value)} /></div>
@@ -74,14 +109,14 @@ export default function StoreRegistration() {
               </div>
             </>
           )}
-          {step === 1 && (
+          {step === 2 && (
             <>
-              <p className="text-sm text-muted-foreground">Document uploads (photos, certificates) will be available after approval. Provide reference numbers.</p>
+              <p className="text-sm text-muted-foreground">Document uploads will be available after approval. Provide reference numbers.</p>
               <div className="space-y-2"><Label>Drug Licence Certificate No.</Label><Input value={form.drugLicenceCert} onChange={(e) => update('drugLicenceCert', e.target.value)} /></div>
               <div className="space-y-2"><Label>Owner ID Proof (Aadhaar/PAN)</Label><Input value={form.ownerIdProof} onChange={(e) => update('ownerIdProof', e.target.value)} /></div>
             </>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Catchment Pincodes</Label><Input value={form.catchmentPincodes} onChange={(e) => update('catchmentPincodes', e.target.value)} placeholder="682001, 682002..." /></div>
@@ -99,7 +134,7 @@ export default function StoreRegistration() {
               <div className="space-y-2"><Label>Emergency Contact</Label><Input value={form.emergencyPhone} onChange={(e) => update('emergencyPhone', e.target.value)} /></div>
             </>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <>
               <p className="text-sm text-muted-foreground">Add a few products to get started. You can add more after approval.</p>
               {form.starterProducts.map((p, i) => (

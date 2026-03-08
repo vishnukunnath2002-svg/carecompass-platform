@@ -6,10 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import MultiStepForm from '@/components/registration/MultiStepForm';
+import FeatureTour from '@/components/registration/FeatureTour';
+import PlanSelector from '@/components/registration/PlanSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const steps = [
+  { title: 'Choose Plan', description: 'Select a subscription plan for your business.' },
   { title: 'Company Details', description: 'Basic company information.' },
   { title: 'Compliance', description: 'Licences and certifications.' },
   { title: 'Payout Setup', description: 'Banking details for payouts.' },
@@ -17,7 +21,9 @@ const steps = [
 ];
 
 export default function VendorRegistration() {
+  const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
+    planId: '' as string | null,
     companyName: '', businessType: '', contactName: '', phone: '', email: '', password: '', gst: '', address: '',
     drugLicence: '', mfgLicence: '', isoCert: '', letterhead: '',
     accountHolder: '', bankAccount: '', ifsc: '', billingEmail: '',
@@ -33,20 +39,49 @@ export default function VendorRegistration() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const { error } = await signUp(form.email, form.password, { full_name: form.contactName, phone: form.phone, registration_type: 'vendor' });
-    setIsSubmitting(false);
     if (error) {
+      setIsSubmitting(false);
       toast({ title: 'Registration failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Application submitted!', description: 'We will review and activate your vendor account.' });
-      navigate('/auth');
+      return;
     }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      try {
+        await supabase.functions.invoke('provision-tenant', {
+          body: {
+            user_id: user.id,
+            plan_id: form.planId,
+            tenant_name: form.companyName,
+            tenant_type: 'vendor',
+            domain_slug: form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            contact_email: form.email,
+            contact_phone: form.phone,
+            gst_number: form.gst,
+          },
+        });
+      } catch (e) {
+        console.error('Tenant provisioning error:', e);
+      }
+    }
+
+    setIsSubmitting(false);
+    toast({ title: 'Application submitted!', description: 'We will review and activate your vendor account.' });
+    navigate('/auth');
   };
+
+  if (showTour) {
+    return <FeatureTour role="vendor" onComplete={() => setShowTour(false)} />;
+  }
 
   return (
     <MultiStepForm title="Medical Vendor Registration" steps={steps} onSubmit={handleSubmit} isSubmitting={isSubmitting}>
       {(step, next, prev) => (
         <div className="space-y-4">
           {step === 0 && (
+            <PlanSelector selectedPlanId={form.planId} onSelect={(id) => update('planId', id)} />
+          )}
+          {step === 1 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Company Name *</Label><Input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} /></div>
@@ -64,7 +99,7 @@ export default function VendorRegistration() {
               <div className="space-y-2"><Label>Registered Address</Label><Textarea value={form.address} onChange={(e) => update('address', e.target.value)} /></div>
             </>
           )}
-          {step === 1 && (
+          {step === 2 && (
             <>
               <p className="text-sm text-muted-foreground">Provide licence/certificate numbers. Documents can be uploaded after approval.</p>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -74,7 +109,7 @@ export default function VendorRegistration() {
               <div className="space-y-2"><Label>ISO Certificate No.</Label><Input value={form.isoCert} onChange={(e) => update('isoCert', e.target.value)} /></div>
             </>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <>
               <div className="space-y-2"><Label>Account Holder Name</Label><Input value={form.accountHolder} onChange={(e) => update('accountHolder', e.target.value)} /></div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -84,7 +119,7 @@ export default function VendorRegistration() {
               <div className="space-y-2"><Label>Billing Email</Label><Input type="email" value={form.billingEmail} onChange={(e) => update('billingEmail', e.target.value)} /></div>
             </>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <>
               <div className="space-y-2"><Label>Product Categories</Label><Textarea value={form.categories} onChange={(e) => update('categories', e.target.value)} placeholder="Medical devices, consumables, PPE..." /></div>
               <div className="grid gap-4 sm:grid-cols-2">

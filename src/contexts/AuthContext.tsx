@@ -8,6 +8,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   roles: UserRole[];
+  tenantSlug: string | null;
+  tenantId: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
@@ -20,16 +22,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchRoles = async (userId: string) => {
     try {
       const { data } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('role, tenant_id')
         .eq('user_id', userId);
       if (data) {
         setRoles(data.map((r: any) => r.role as UserRole));
+        // Get tenant slug if user has a tenant_id
+        const firstTenantId = data.find((r: any) => r.tenant_id)?.tenant_id;
+        if (firstTenantId) {
+          setTenantId(firstTenantId);
+          const { data: tenant } = await supabase
+            .from('tenants')
+            .select('domain_slug')
+            .eq('id', firstTenantId)
+            .single();
+          if (tenant?.domain_slug) {
+            setTenantSlug(tenant.domain_slug);
+          }
+        }
       }
     } catch {
       setRoles([]);
@@ -44,6 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setTimeout(() => fetchRoles(session.user.id), 0);
       } else {
         setRoles([]);
+        setTenantSlug(null);
+        setTenantId(null);
       }
       setLoading(false);
     });
@@ -77,10 +96,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await supabase.auth.signOut();
     setRoles([]);
+    setTenantSlug(null);
+    setTenantId(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, roles, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, roles, tenantSlug, tenantId, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
