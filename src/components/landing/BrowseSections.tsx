@@ -520,11 +520,6 @@ export function BrowseAgenciesSection() {
         </div>
       </section>
 
-      <AgencyProfileDialog
-        agency={selectedAgency}
-        open={!!selectedAgency}
-        onOpenChange={(open) => !open && setSelectedAgency(null)}
-      />
     </>
   );
 }
