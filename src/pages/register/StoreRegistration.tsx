@@ -24,7 +24,7 @@ export default function StoreRegistration() {
   const [showTour, setShowTour] = useState(true);
   const [form, setForm] = useState({
     planId: '' as string | null,
-    storeName: '', ownerName: '', phone: '', email: '', password: '', storeAddress: '', gst: '', drugLicence: '',
+    storeName: '', ownerName: '', phone: '', email: '', password: '', storeAddress: '', city: '', state: '', pincode: '', gst: '', drugLicence: '',
     drugLicenceCert: '', ownerIdProof: '',
     catchmentPincodes: '', catchmentRadius: '', operatingHours: '', deliveryAvailable: true, ownDeliveryStaff: false,
     minOrderValue: '', deliveryFee: '', emergencyPhone: '',
