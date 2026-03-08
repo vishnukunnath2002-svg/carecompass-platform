@@ -24,6 +24,7 @@ interface Provider {
   daily_rate: number | null;
   weekly_rate: number | null;
   rating: number | null;
+  tenant_id: string | null;
   review_count: number | null;
   bio: string | null;
 }
