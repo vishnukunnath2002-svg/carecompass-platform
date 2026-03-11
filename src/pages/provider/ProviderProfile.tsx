@@ -79,8 +79,35 @@ export default function ProviderProfile() {
     }
   }, [highlight, loaded]);
 
+  const mandatoryFields = [
+    { key: 'full_name', label: 'Full Name', value: profile?.full_name },
+    { key: 'phone', label: 'Phone', value: profile?.phone },
+    { key: 'bio', label: 'Bio', value: caregiver.bio },
+    { key: 'qualification', label: 'Qualification', value: caregiver.qualification },
+    { key: 'years_experience', label: 'Years of Experience', value: caregiver.years_experience },
+    { key: 'languages', label: 'Languages', value: caregiver.languages.length > 0 ? 'ok' : '' },
+    { key: 'specializations', label: 'Specializations', value: caregiver.specializations.length > 0 ? 'ok' : '' },
+    { key: 'hourly_rate', label: 'Hourly Rate', value: caregiver.hourly_rate },
+  ];
+
   const handleSave = async () => {
     if (!profile || !user) return;
+
+    const missing = mandatoryFields.filter(f => !f.value || String(f.value).trim() === '' || f.value === '0');
+    if (missing.length > 0) {
+      toast({
+        title: 'Missing mandatory fields',
+        description: `Please fill: ${missing.map(f => f.label).join(', ')}`,
+        variant: 'destructive',
+      });
+      // Scroll to first missing field
+      const firstKey = missing[0].key;
+      if (highlightRefs.current[firstKey]) {
+        highlightRefs.current[firstKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     setSaving(true);
     await supabase.from('profiles').update({
       full_name: profile.full_name,
@@ -128,7 +155,7 @@ export default function ProviderProfile() {
         <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />Personal Info</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div ref={el => { highlightRefs.current['full_name'] = el; }} className={fieldClass('full_name')}>
-            <Label>Full Name</Label>
+            <Label>Full Name <span className="text-destructive">*</span></Label>
             <Input value={profile?.full_name || ''} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} />
           </div>
           <div className="space-y-2">
@@ -136,7 +163,7 @@ export default function ProviderProfile() {
             <Input value={profile?.email || ''} disabled className="bg-muted" />
           </div>
           <div ref={el => { highlightRefs.current['phone'] = el; }} className={fieldClass('phone')}>
-            <Label>Phone</Label>
+            <Label>Phone <span className="text-destructive">*</span></Label>
             <Input value={profile?.phone || ''} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} placeholder="e.g. 9876543210" />
           </div>
         </CardContent>
@@ -146,27 +173,27 @@ export default function ProviderProfile() {
         <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" />Professional Details</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div ref={el => { highlightRefs.current['bio'] = el; }} className={fieldClass('bio')}>
-            <Label>Bio</Label>
+            <Label>Bio <span className="text-destructive">*</span></Label>
             <Textarea value={caregiver.bio} onChange={(e) => setCaregiver({ ...caregiver, bio: e.target.value })} placeholder="Brief professional bio..." />
           </div>
           <div ref={el => { highlightRefs.current['qualification'] = el; }} className={fieldClass('qualification')}>
-            <Label>Qualification</Label>
+            <Label>Qualification <span className="text-destructive">*</span></Label>
             <Input value={caregiver.qualification} onChange={(e) => setCaregiver({ ...caregiver, qualification: e.target.value })} placeholder="e.g. GNM, BSc Nursing" />
           </div>
           <div ref={el => { highlightRefs.current['years_experience'] = el; }} className={fieldClass('years_experience')}>
-            <Label>Years of Experience</Label>
+            <Label>Years of Experience <span className="text-destructive">*</span></Label>
             <Input type="number" min={0} value={caregiver.years_experience} onChange={(e) => setCaregiver({ ...caregiver, years_experience: e.target.value })} placeholder="e.g. 3" />
           </div>
           <div ref={el => { highlightRefs.current['languages'] = el; }} className={fieldClass('languages')}>
-            <Label>Languages</Label>
+            <Label>Languages <span className="text-destructive">*</span></Label>
             <MultiSelect options={languageOptions} selected={caregiver.languages} onChange={(v) => setCaregiver({ ...caregiver, languages: v })} placeholder="Select languages..." />
           </div>
           <div ref={el => { highlightRefs.current['specializations'] = el; }} className={fieldClass('specializations')}>
-            <Label>Specializations</Label>
+            <Label>Specializations <span className="text-destructive">*</span></Label>
             <MultiSelect options={specializationOptions} selected={caregiver.specializations} onChange={(v) => setCaregiver({ ...caregiver, specializations: v })} placeholder="Select specializations..." />
           </div>
           <div ref={el => { highlightRefs.current['hourly_rate'] = el; }} className={fieldClass('hourly_rate')}>
-            <Label>Hourly Rate (₹)</Label>
+            <Label>Hourly Rate (₹) <span className="text-destructive">*</span></Label>
             <Input type="number" min={0} value={caregiver.hourly_rate} onChange={(e) => setCaregiver({ ...caregiver, hourly_rate: e.target.value })} placeholder="e.g. 250" />
           </div>
           {caregiverId && (
