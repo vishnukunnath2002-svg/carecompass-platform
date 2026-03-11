@@ -79,8 +79,35 @@ export default function ProviderProfile() {
     }
   }, [highlight, loaded]);
 
+  const mandatoryFields = [
+    { key: 'full_name', label: 'Full Name', value: profile?.full_name },
+    { key: 'phone', label: 'Phone', value: profile?.phone },
+    { key: 'bio', label: 'Bio', value: caregiver.bio },
+    { key: 'qualification', label: 'Qualification', value: caregiver.qualification },
+    { key: 'years_experience', label: 'Years of Experience', value: caregiver.years_experience },
+    { key: 'languages', label: 'Languages', value: caregiver.languages.length > 0 ? 'ok' : '' },
+    { key: 'specializations', label: 'Specializations', value: caregiver.specializations.length > 0 ? 'ok' : '' },
+    { key: 'hourly_rate', label: 'Hourly Rate', value: caregiver.hourly_rate },
+  ];
+
   const handleSave = async () => {
     if (!profile || !user) return;
+
+    const missing = mandatoryFields.filter(f => !f.value || String(f.value).trim() === '' || f.value === '0');
+    if (missing.length > 0) {
+      toast({
+        title: 'Missing mandatory fields',
+        description: `Please fill: ${missing.map(f => f.label).join(', ')}`,
+        variant: 'destructive',
+      });
+      // Scroll to first missing field
+      const firstKey = missing[0].key;
+      if (highlightRefs.current[firstKey]) {
+        highlightRefs.current[firstKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     setSaving(true);
     await supabase.from('profiles').update({
       full_name: profile.full_name,
