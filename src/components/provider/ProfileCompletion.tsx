@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle, Circle, UserCheck } from 'lucide-react';
+import { Circle, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface FieldCheck {
@@ -30,14 +30,14 @@ export default function ProfileCompletion() {
       const hasDoc = (key: string) => docs[key]?.url && docs[key].url.length > 0;
 
       const fields: FieldCheck[] = [
-        { label: 'Full Name', filled: !!profile?.full_name, link: '/provider/profile' },
-        { label: 'Phone Number', filled: !!profile?.phone, link: '/provider/profile' },
-        { label: 'Bio', filled: !!caregiver?.bio, link: '/provider/profile' },
-        { label: 'Qualification', filled: !!caregiver?.qualification, link: '/provider/profile' },
-        { label: 'Years of Experience', filled: (caregiver?.years_experience ?? 0) > 0, link: '/provider/profile' },
-        { label: 'Languages', filled: (caregiver?.languages?.length ?? 0) > 0, link: '/provider/profile' },
-        { label: 'Specializations', filled: (caregiver?.specializations?.length ?? 0) > 0, link: '/provider/profile' },
-        { label: 'Hourly Rate', filled: !!caregiver?.hourly_rate, link: '/provider/profile' },
+        { label: 'Full Name', filled: !!profile?.full_name, link: '/provider/profile?highlight=full_name' },
+        { label: 'Phone Number', filled: !!profile?.phone, link: '/provider/profile?highlight=phone' },
+        { label: 'Bio', filled: !!caregiver?.bio, link: '/provider/profile?highlight=bio' },
+        { label: 'Qualification', filled: !!caregiver?.qualification, link: '/provider/profile?highlight=qualification' },
+        { label: 'Years of Experience', filled: (caregiver?.years_experience ?? 0) > 0, link: '/provider/profile?highlight=years_experience' },
+        { label: 'Languages', filled: (caregiver?.languages?.length ?? 0) > 0, link: '/provider/profile?highlight=languages' },
+        { label: 'Specializations', filled: (caregiver?.specializations?.length ?? 0) > 0, link: '/provider/profile?highlight=specializations' },
+        { label: 'Hourly Rate', filled: !!caregiver?.hourly_rate, link: '/provider/profile?highlight=hourly_rate' },
         { label: 'Availability Set', filled: (caregiver?.available_days?.length ?? 0) > 0, link: '/provider/availability' },
         { label: 'ID Proof Uploaded', filled: hasDoc('id_proof'), link: '/provider/documents' },
         { label: 'Qualification Certificate', filled: hasDoc('qualification_cert'), link: '/provider/documents' },
