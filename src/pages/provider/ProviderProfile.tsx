@@ -155,7 +155,7 @@ export default function ProviderProfile() {
         <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />Personal Info</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div ref={el => { highlightRefs.current['full_name'] = el; }} className={fieldClass('full_name')}>
-            <Label>Full Name</Label>
+            <Label>Full Name <span className="text-destructive">*</span></Label>
             <Input value={profile?.full_name || ''} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} />
           </div>
           <div className="space-y-2">
@@ -163,7 +163,7 @@ export default function ProviderProfile() {
             <Input value={profile?.email || ''} disabled className="bg-muted" />
           </div>
           <div ref={el => { highlightRefs.current['phone'] = el; }} className={fieldClass('phone')}>
-            <Label>Phone</Label>
+            <Label>Phone <span className="text-destructive">*</span></Label>
             <Input value={profile?.phone || ''} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} placeholder="e.g. 9876543210" />
           </div>
         </CardContent>
