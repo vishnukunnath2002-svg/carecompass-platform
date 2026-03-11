@@ -173,27 +173,27 @@ export default function ProviderProfile() {
         <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" />Professional Details</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div ref={el => { highlightRefs.current['bio'] = el; }} className={fieldClass('bio')}>
-            <Label>Bio</Label>
+            <Label>Bio <span className="text-destructive">*</span></Label>
             <Textarea value={caregiver.bio} onChange={(e) => setCaregiver({ ...caregiver, bio: e.target.value })} placeholder="Brief professional bio..." />
           </div>
           <div ref={el => { highlightRefs.current['qualification'] = el; }} className={fieldClass('qualification')}>
-            <Label>Qualification</Label>
+            <Label>Qualification <span className="text-destructive">*</span></Label>
             <Input value={caregiver.qualification} onChange={(e) => setCaregiver({ ...caregiver, qualification: e.target.value })} placeholder="e.g. GNM, BSc Nursing" />
           </div>
           <div ref={el => { highlightRefs.current['years_experience'] = el; }} className={fieldClass('years_experience')}>
-            <Label>Years of Experience</Label>
+            <Label>Years of Experience <span className="text-destructive">*</span></Label>
             <Input type="number" min={0} value={caregiver.years_experience} onChange={(e) => setCaregiver({ ...caregiver, years_experience: e.target.value })} placeholder="e.g. 3" />
           </div>
           <div ref={el => { highlightRefs.current['languages'] = el; }} className={fieldClass('languages')}>
-            <Label>Languages</Label>
+            <Label>Languages <span className="text-destructive">*</span></Label>
             <MultiSelect options={languageOptions} selected={caregiver.languages} onChange={(v) => setCaregiver({ ...caregiver, languages: v })} placeholder="Select languages..." />
           </div>
           <div ref={el => { highlightRefs.current['specializations'] = el; }} className={fieldClass('specializations')}>
-            <Label>Specializations</Label>
+            <Label>Specializations <span className="text-destructive">*</span></Label>
             <MultiSelect options={specializationOptions} selected={caregiver.specializations} onChange={(v) => setCaregiver({ ...caregiver, specializations: v })} placeholder="Select specializations..." />
           </div>
           <div ref={el => { highlightRefs.current['hourly_rate'] = el; }} className={fieldClass('hourly_rate')}>
-            <Label>Hourly Rate (₹)</Label>
+            <Label>Hourly Rate (₹) <span className="text-destructive">*</span></Label>
             <Input type="number" min={0} value={caregiver.hourly_rate} onChange={(e) => setCaregiver({ ...caregiver, hourly_rate: e.target.value })} placeholder="e.g. 250" />
           </div>
           {caregiverId && (
