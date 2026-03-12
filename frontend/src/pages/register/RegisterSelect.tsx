@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Heart, Users, Building2, Stethoscope, ShoppingBag, Store, Hospital, ArrowLeft } from 'lucide-react';
+import { Heart, Users, Building2, Stethoscope, ShoppingBag, Store, ArrowLeft } from 'lucide-react';
 
 const registrationTypes = [
   { id: 'patient', label: 'Patient / Family', desc: 'Book care, order medicines, shop medical products.', icon: Users, path: '/register/patient', color: 'bg-info' },
   { id: 'agency', label: 'Homecare Agency / Firm', desc: 'Register your healthcare agency to manage staff and bookings.', icon: Building2, path: '/register/agency', color: 'bg-primary' },
   { id: 'provider', label: 'Individual Provider', desc: 'Nurses, caregivers, companions — join as an independent provider.', icon: Stethoscope, path: '/register/provider', color: 'bg-accent' },
   { id: 'business', label: 'Business Partner', desc: 'Medical vendors, suppliers, or pharmacy stores.', icon: ShoppingBag, path: '/register/business', color: 'bg-warning' },
-  { id: 'hospital', label: 'Hospital', desc: 'Institutional procurement, RFQs, and discharge care.', icon: Hospital, path: '/register/hospital', color: 'bg-destructive' },
+  
 ];
 
 const businessSubTypes = [

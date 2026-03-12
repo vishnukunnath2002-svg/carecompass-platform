@@ -14,14 +14,14 @@ import AgencyRegistration from "./pages/register/AgencyRegistration";
 import ProviderRegistration from "./pages/register/ProviderRegistration";
 import VendorRegistration from "./pages/register/VendorRegistration";
 import StoreRegistration from "./pages/register/StoreRegistration";
-import HospitalRegistration from "./pages/register/HospitalRegistration";
+
 import AdminPortal from "./pages/admin/AdminPortal";
 import PatientPortal from "./pages/patient/PatientPortal";
 import AgencyPortal from "./pages/agency/AgencyPortal";
 import ProviderPortal from "./pages/provider/ProviderPortal";
 import VendorPortal from "./pages/vendor/VendorPortal";
 import StorePortal from "./pages/store/StorePortal";
-import HospitalPortal from "./pages/hospital/HospitalPortal";
+
 import SubscriptionRenewal from "./pages/shared/SubscriptionRenewal";
 import AgencyProfile from "./pages/AgencyProfile";
 
@@ -114,15 +114,6 @@ import StoreAnalytics from "./pages/store/StoreAnalytics";
 import StorePayouts from "./pages/store/StorePayouts";
 import StoreSettings from "./pages/store/StoreSettings";
 
-// Hospital pages
-import HospitalRFQ from "./pages/hospital/HospitalRFQ";
-import HospitalPOs from "./pages/hospital/HospitalPOs";
-import BulkOrders from "./pages/hospital/BulkOrders";
-import QuoteComparison from "./pages/hospital/QuoteComparison";
-import DischargeCare from "./pages/hospital/DischargeCare";
-import HospitalInvoices from "./pages/hospital/HospitalInvoices";
-import HospitalUsers from "./pages/hospital/HospitalUsers";
-import HospitalAnalytics from "./pages/hospital/HospitalAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -147,7 +138,7 @@ const App = () => (
             <Route path="/register/provider" element={<ProviderRegistration />} />
             <Route path="/register/vendor" element={<VendorRegistration />} />
             <Route path="/register/store" element={<StoreRegistration />} />
-            <Route path="/register/hospital" element={<HospitalRegistration />} />
+            
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
@@ -250,17 +241,6 @@ const App = () => (
               <Route path="settings" element={<StoreSettings />} />
             </Route>
 
-            {/* Hospital Portal */}
-            <Route path="/hospital" element={<HospitalPortal />}>
-              <Route path="orders" element={<BulkOrders />} />
-              <Route path="rfq" element={<HospitalRFQ />} />
-              <Route path="quotes" element={<QuoteComparison />} />
-              <Route path="po" element={<HospitalPOs />} />
-              <Route path="discharge" element={<DischargeCare />} />
-              <Route path="invoices" element={<HospitalInvoices />} />
-              <Route path="users" element={<HospitalUsers />} />
-              <Route path="analytics" element={<HospitalAnalytics />} />
-            </Route>
 
             {/* Tenant-scoped routes */}
             <Route path="/t/:slug/agency/*" element={<AgencyPortal />}>
@@ -315,16 +295,6 @@ const App = () => (
               <Route path="analytics" element={<StoreAnalytics />} />
               <Route path="payouts" element={<StorePayouts />} />
               <Route path="settings" element={<StoreSettings />} />
-            </Route>
-            <Route path="/t/:slug/hospital/*" element={<HospitalPortal />}>
-              <Route path="orders" element={<BulkOrders />} />
-              <Route path="rfq" element={<HospitalRFQ />} />
-              <Route path="quotes" element={<QuoteComparison />} />
-              <Route path="po" element={<HospitalPOs />} />
-              <Route path="discharge" element={<DischargeCare />} />
-              <Route path="invoices" element={<HospitalInvoices />} />
-              <Route path="users" element={<HospitalUsers />} />
-              <Route path="analytics" element={<HospitalAnalytics />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

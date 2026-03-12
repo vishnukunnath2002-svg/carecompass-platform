@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Hospital, Users, ArrowLeft } from 'lucide-react';
+import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Users, ArrowLeft } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import authService from '@/services/authService';
@@ -17,7 +17,7 @@ const demoAccounts = [
   { role: 'Nurse (Provider)', email: 'nurse@cylo.demo', password: 'demo1234', icon: Stethoscope, color: 'bg-accent', path: '/provider' },
   { role: 'Vendor', email: 'vendor@cylo.demo', password: 'demo1234', icon: ShoppingBag, color: 'bg-warning', path: '/vendor' },
   { role: 'Medical Store', email: 'store@cylo.demo', password: 'demo1234', icon: Store, color: 'bg-success', path: '/store' },
-  { role: 'Hospital', email: 'hospital@cylo.demo', password: 'demo1234', icon: Hospital, color: 'bg-destructive', path: '/hospital' },
+  
   { role: 'Patient / Family', email: 'patient@cylo.demo', password: 'demo1234', icon: Users, color: 'bg-info', path: '/patient' },
 ];
 
@@ -140,7 +140,7 @@ export default function Auth() {
                       { label: 'Individual Provider', desc: 'Nurse, caregiver or companion', icon: Stethoscope, color: 'bg-accent', path: '/register/provider' },
                       { label: 'Medical Vendor', desc: 'Sell medical equipment & supplies', icon: ShoppingBag, color: 'bg-warning', path: '/register/vendor' },
                       { label: 'Medical Store', desc: 'Pharmacy & local medicine delivery', icon: Store, color: 'bg-success', path: '/register/store' },
-                      { label: 'Hospital', desc: 'Procurement, RFQs & discharge care', icon: Hospital, color: 'bg-destructive', path: '/register/hospital' },
+                      
                     ].map((role) => (
                       <button
                         key={role.path}

@@ -130,7 +130,7 @@ export default function SubscriptionRenewal() {
       agency: '/agency',
       vendor: '/vendor',
       medical_store: '/store',
-      hospital: '/hospital',
+      
       provider: '/provider',
     };
     return typeMap[tenant.type] || '/';

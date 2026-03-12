@@ -85,13 +85,6 @@ const tourSlides: Record<RoleType, Slide[]> = {
       gradient: 'from-primary to-accent',
     },
     {
-      title: 'Hospital RFQs',
-      description: 'Respond to hospital procurement requests and win large supply contracts.',
-      icon: FileText,
-      features: ['RFQ notifications', 'Quote submission', 'Purchase order tracking', 'Contract management'],
-      gradient: 'from-success to-primary',
-    },
-    {
       title: 'Analytics & Payouts',
       description: 'Track sales performance and receive timely payouts.',
       icon: BarChart3,
