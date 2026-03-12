@@ -138,7 +138,7 @@ const App = () => (
             <Route path="/register/provider" element={<ProviderRegistration />} />
             <Route path="/register/vendor" element={<VendorRegistration />} />
             <Route path="/register/store" element={<StoreRegistration />} />
-            <Route path="/register/hospital" element={<HospitalRegistration />} />
+            
 
             {/* Admin Portal */}
             <Route path="/admin" element={<AdminPortal />}>
