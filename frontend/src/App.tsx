@@ -21,7 +21,7 @@ import AgencyPortal from "./pages/agency/AgencyPortal";
 import ProviderPortal from "./pages/provider/ProviderPortal";
 import VendorPortal from "./pages/vendor/VendorPortal";
 import StorePortal from "./pages/store/StorePortal";
-import HospitalPortal from "./pages/hospital/HospitalPortal";
+
 import SubscriptionRenewal from "./pages/shared/SubscriptionRenewal";
 import AgencyProfile from "./pages/AgencyProfile";
 
