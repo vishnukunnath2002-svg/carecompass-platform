@@ -2,11 +2,12 @@
   "name": "cylo-platform",
   "private": true,
   "version": "0.0.0",
-  "workspaces": ["frontend"],
+  "type": "module",
   "scripts": {
-    "dev": "npm run dev --workspace=frontend",
-    "build": "npm run build --workspace=frontend",
-    "preview": "npm run preview --workspace=frontend",
-    "test": "npm run test --workspace=frontend"
+    "postinstall": "cd frontend && bun install",
+    "dev": "cd frontend && bun run dev",
+    "build": "cd frontend && bun run build",
+    "preview": "cd frontend && bun run preview",
+    "test": "cd frontend && bun run test"
   }
 }
