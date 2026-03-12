@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "cd frontend && bun install",
-    "dev": "cd frontend && bun run dev",
+    "dev": "cd frontend && bun install && bun run dev",
     "build": "cd frontend && bun run build",
     "preview": "cd frontend && bun run preview",
     "test": "cd frontend && bun run test"
