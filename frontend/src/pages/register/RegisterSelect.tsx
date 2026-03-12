@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Heart, Users, Building2, Stethoscope, ShoppingBag, Store, Hospital, ArrowLeft } from 'lucide-react';
+import { Heart, Users, Building2, Stethoscope, ShoppingBag, Store, ArrowLeft } from 'lucide-react';
 
 const registrationTypes = [
   { id: 'patient', label: 'Patient / Family', desc: 'Book care, order medicines, shop medical products.', icon: Users, path: '/register/patient', color: 'bg-info' },
