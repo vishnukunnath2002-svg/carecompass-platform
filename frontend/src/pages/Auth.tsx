@@ -17,7 +17,7 @@ const demoAccounts = [
   { role: 'Nurse (Provider)', email: 'nurse@cylo.demo', password: 'demo1234', icon: Stethoscope, color: 'bg-accent', path: '/provider' },
   { role: 'Vendor', email: 'vendor@cylo.demo', password: 'demo1234', icon: ShoppingBag, color: 'bg-warning', path: '/vendor' },
   { role: 'Medical Store', email: 'store@cylo.demo', password: 'demo1234', icon: Store, color: 'bg-success', path: '/store' },
-  { role: 'Hospital', email: 'hospital@cylo.demo', password: 'demo1234', icon: Hospital, color: 'bg-destructive', path: '/hospital' },
+  
   { role: 'Patient / Family', email: 'patient@cylo.demo', password: 'demo1234', icon: Users, color: 'bg-info', path: '/patient' },
 ];
 
