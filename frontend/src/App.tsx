@@ -114,15 +114,6 @@ import StoreAnalytics from "./pages/store/StoreAnalytics";
 import StorePayouts from "./pages/store/StorePayouts";
 import StoreSettings from "./pages/store/StoreSettings";
 
-// Hospital pages
-import HospitalRFQ from "./pages/hospital/HospitalRFQ";
-import HospitalPOs from "./pages/hospital/HospitalPOs";
-import BulkOrders from "./pages/hospital/BulkOrders";
-import QuoteComparison from "./pages/hospital/QuoteComparison";
-import DischargeCare from "./pages/hospital/DischargeCare";
-import HospitalInvoices from "./pages/hospital/HospitalInvoices";
-import HospitalUsers from "./pages/hospital/HospitalUsers";
-import HospitalAnalytics from "./pages/hospital/HospitalAnalytics";
 
 const queryClient = new QueryClient();
 
