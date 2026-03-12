@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vite --root frontend",
-    "build": "vite build --root frontend",
-    "preview": "vite preview --root frontend",
-    "test": "cd frontend && vitest run"
+    "dev": "cd frontend && npx vite",
+    "build": "cd frontend && npx vite build",
+    "preview": "cd frontend && npx vite preview",
+    "test": "cd frontend && npx vitest run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
