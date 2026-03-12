@@ -26,8 +26,8 @@ const MODULES = [
     border: 'border-blue-500/20',
     label: 'Module 2',
     description: 'Buy and sell medical consumables, surgical packs, PPE, homecare products, monitoring devices, mobility equipment, and respiratory devices.',
-    features: ['Product catalogue management', 'Bulk & MOQ ordering', 'RFQ & quote comparison', 'Order tracking & dispatch', 'Hospital procurement integration', 'Inventory & pricing management'],
-    audience: 'Medical Vendors & Hospitals',
+    features: ['Product catalogue management', 'Bulk & MOQ ordering', 'RFQ & quote comparison', 'Order tracking & dispatch', 'Inventory & pricing management'],
+    audience: 'Medical Vendors',
   },
   {
     key: 'store_connect',

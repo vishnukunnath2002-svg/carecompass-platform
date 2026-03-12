@@ -296,16 +296,6 @@ const App = () => (
               <Route path="payouts" element={<StorePayouts />} />
               <Route path="settings" element={<StoreSettings />} />
             </Route>
-            <Route path="/t/:slug/hospital/*" element={<HospitalPortal />}>
-              <Route path="orders" element={<BulkOrders />} />
-              <Route path="rfq" element={<HospitalRFQ />} />
-              <Route path="quotes" element={<QuoteComparison />} />
-              <Route path="po" element={<HospitalPOs />} />
-              <Route path="discharge" element={<DischargeCare />} />
-              <Route path="invoices" element={<HospitalInvoices />} />
-              <Route path="users" element={<HospitalUsers />} />
-              <Route path="analytics" element={<HospitalAnalytics />} />
-            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>

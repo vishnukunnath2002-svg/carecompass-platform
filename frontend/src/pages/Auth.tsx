@@ -140,7 +140,7 @@ export default function Auth() {
                       { label: 'Individual Provider', desc: 'Nurse, caregiver or companion', icon: Stethoscope, color: 'bg-accent', path: '/register/provider' },
                       { label: 'Medical Vendor', desc: 'Sell medical equipment & supplies', icon: ShoppingBag, color: 'bg-warning', path: '/register/vendor' },
                       { label: 'Medical Store', desc: 'Pharmacy & local medicine delivery', icon: Store, color: 'bg-success', path: '/register/store' },
-                      { label: 'Hospital', desc: 'Procurement, RFQs & discharge care', icon: Hospital, color: 'bg-destructive', path: '/register/hospital' },
+                      
                     ].map((role) => (
                       <button
                         key={role.path}

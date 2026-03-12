@@ -9,7 +9,7 @@ const registrationTypes = [
   { id: 'agency', label: 'Homecare Agency / Firm', desc: 'Register your healthcare agency to manage staff and bookings.', icon: Building2, path: '/register/agency', color: 'bg-primary' },
   { id: 'provider', label: 'Individual Provider', desc: 'Nurses, caregivers, companions — join as an independent provider.', icon: Stethoscope, path: '/register/provider', color: 'bg-accent' },
   { id: 'business', label: 'Business Partner', desc: 'Medical vendors, suppliers, or pharmacy stores.', icon: ShoppingBag, path: '/register/business', color: 'bg-warning' },
-  { id: 'hospital', label: 'Hospital', desc: 'Institutional procurement, RFQs, and discharge care.', icon: Hospital, path: '/register/hospital', color: 'bg-destructive' },
+  
 ];
 
 const businessSubTypes = [

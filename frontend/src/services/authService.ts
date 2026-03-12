@@ -161,8 +161,6 @@ const authService = {
       vendor_inventory: '/vendor', vendor_orders: '/vendor', vendor_finance: '/vendor',
       store_admin: '/store', store_counter: '/store',
       store_inventory: '/store', store_dispatch: '/store',
-      hospital_admin: '/hospital', hospital_procurement: '/hospital',
-      hospital_discharge: '/hospital', hospital_nursing: '/hospital',
     };
 
     const tenantRole = user.roles.find((r) => r.tenant_id && r.tenant_slug);
