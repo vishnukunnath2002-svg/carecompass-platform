@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Hospital, Users, ArrowLeft } from 'lucide-react';
+import { Heart, Shield, Building2, Stethoscope, ShoppingBag, Store, Users, ArrowLeft } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import authService from '@/services/authService';
