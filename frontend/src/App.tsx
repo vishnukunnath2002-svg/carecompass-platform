@@ -14,7 +14,7 @@ import AgencyRegistration from "./pages/register/AgencyRegistration";
 import ProviderRegistration from "./pages/register/ProviderRegistration";
 import VendorRegistration from "./pages/register/VendorRegistration";
 import StoreRegistration from "./pages/register/StoreRegistration";
-import HospitalRegistration from "./pages/register/HospitalRegistration";
+
 import AdminPortal from "./pages/admin/AdminPortal";
 import PatientPortal from "./pages/patient/PatientPortal";
 import AgencyPortal from "./pages/agency/AgencyPortal";
