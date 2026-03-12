@@ -241,17 +241,6 @@ const App = () => (
               <Route path="settings" element={<StoreSettings />} />
             </Route>
 
-            {/* Hospital Portal */}
-            <Route path="/hospital" element={<HospitalPortal />}>
-              <Route path="orders" element={<BulkOrders />} />
-              <Route path="rfq" element={<HospitalRFQ />} />
-              <Route path="quotes" element={<QuoteComparison />} />
-              <Route path="po" element={<HospitalPOs />} />
-              <Route path="discharge" element={<DischargeCare />} />
-              <Route path="invoices" element={<HospitalInvoices />} />
-              <Route path="users" element={<HospitalUsers />} />
-              <Route path="analytics" element={<HospitalAnalytics />} />
-            </Route>
 
             {/* Tenant-scoped routes */}
             <Route path="/t/:slug/agency/*" element={<AgencyPortal />}>
