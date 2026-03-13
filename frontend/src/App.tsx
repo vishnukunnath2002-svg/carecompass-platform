@@ -201,6 +201,9 @@ const App = () => (
               <Route path="partnerships" element={<PharmacyPartnerships />} />
               <Route path="referrals" element={<PatientReferrals />} />
               <Route path="service-requests" element={<ServiceRequests />} />
+              <Route path="attendance" element={<StaffAttendance />} />
+              <Route path="leaves" element={<LeaveManagement />} />
+              <Route path="payroll" element={<StaffPayroll />} />
             </Route>
 
             {/* Provider Portal */}
