@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   LayoutDashboard, Users, ClipboardCheck, CalendarDays, Tag, DollarSign,
   Settings, BarChart3, Star, UserPlus, Wallet, Heart, ShoppingBag, Package,
-  Handshake, ArrowRightLeft, ClipboardList
+  Handshake, ArrowRightLeft, ClipboardList, Clock, CalendarOff, IndianRupee
 } from 'lucide-react';
 
 // Basic items accessible to ALL plans
@@ -34,6 +34,9 @@ function getBaseNavItems(basePath: string): NavItem[] {
     { title: 'Bookings', url: `${basePath}/bookings`, icon: CalendarDays, module: 'homecare' },
     { title: 'Service Catalogue', url: `${basePath}/services`, icon: Tag, module: 'homecare' },
     { title: 'Pricing', url: `${basePath}/pricing`, icon: DollarSign, module: 'homecare' },
+    { title: 'Attendance', url: `${basePath}/attendance`, icon: Clock, module: 'homecare' },
+    { title: 'Leaves', url: `${basePath}/leaves`, icon: CalendarOff, module: 'homecare' },
+    { title: 'Payroll', url: `${basePath}/payroll`, icon: IndianRupee, module: 'homecare' },
     { title: 'Health Logs', url: `${basePath}/health-logs`, icon: Heart, module: 'homecare' },
     { title: 'Browse Equipment', url: `${basePath}/equipment`, icon: ShoppingBag, module: 'ecommerce' },
     { title: 'Equipment Orders', url: `${basePath}/inventory`, icon: Package, module: 'ecommerce' },

@@ -78,6 +78,9 @@ import AgencyInventory from "./pages/agency/AgencyInventory";
 import PharmacyPartnerships from "./pages/agency/PharmacyPartnerships";
 import PatientReferrals from "./pages/agency/PatientReferrals";
 import ServiceRequests from "./pages/agency/ServiceRequests";
+import StaffAttendance from "./pages/agency/StaffAttendance";
+import LeaveManagement from "./pages/agency/LeaveManagement";
+import StaffPayroll from "./pages/agency/StaffPayroll";
 
 // Provider pages
 import ProviderBookings from "./pages/provider/ProviderBookings";
@@ -198,6 +201,9 @@ const App = () => (
               <Route path="partnerships" element={<PharmacyPartnerships />} />
               <Route path="referrals" element={<PatientReferrals />} />
               <Route path="service-requests" element={<ServiceRequests />} />
+              <Route path="attendance" element={<StaffAttendance />} />
+              <Route path="leaves" element={<LeaveManagement />} />
+              <Route path="payroll" element={<StaffPayroll />} />
             </Route>
 
             {/* Provider Portal */}
@@ -260,6 +266,9 @@ const App = () => (
               <Route path="partnerships" element={<PharmacyPartnerships />} />
               <Route path="referrals" element={<PatientReferrals />} />
               <Route path="service-requests" element={<ServiceRequests />} />
+              <Route path="attendance" element={<StaffAttendance />} />
+              <Route path="leaves" element={<LeaveManagement />} />
+              <Route path="payroll" element={<StaffPayroll />} />
             </Route>
             <Route path="/t/:slug/provider/*" element={<ProviderPortal />}>
               <Route path="profile" element={<ProviderProfile />} />

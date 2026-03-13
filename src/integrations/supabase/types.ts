@@ -758,6 +758,66 @@ export type Database = {
         }
         Relationships: []
       }
+      leave_requests: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          leave_type: string
+          provider_id: string
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_date: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          leave_type?: string
+          provider_id: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          provider_id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "caregiver_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medical_store_profiles: {
         Row: {
           catchment_pincodes: string[] | null
@@ -1731,6 +1791,138 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      staff_attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          date: string
+          hours_worked: number | null
+          id: string
+          marked_by: string | null
+          notes: string | null
+          provider_id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date: string
+          hours_worked?: number | null
+          id?: string
+          marked_by?: string | null
+          notes?: string | null
+          provider_id: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date?: string
+          hours_worked?: number | null
+          id?: string
+          marked_by?: string | null
+          notes?: string | null
+          provider_id?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_attendance_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "caregiver_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_attendance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_payroll: {
+        Row: {
+          base_amount: number
+          bonus: number | null
+          created_at: string
+          days_absent: number | null
+          days_worked: number | null
+          deductions: number | null
+          id: string
+          net_amount: number
+          notes: string | null
+          payment_date: string | null
+          period_end: string
+          period_start: string
+          provider_id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number
+          bonus?: number | null
+          created_at?: string
+          days_absent?: number | null
+          days_worked?: number | null
+          deductions?: number | null
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          payment_date?: string | null
+          period_end: string
+          period_start: string
+          provider_id: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          bonus?: number | null
+          created_at?: string
+          days_absent?: number | null
+          days_worked?: number | null
+          deductions?: number | null
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          payment_date?: string | null
+          period_end?: string
+          period_start?: string
+          provider_id?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_payroll_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "caregiver_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_payroll_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       store_inventory: {
         Row: {
