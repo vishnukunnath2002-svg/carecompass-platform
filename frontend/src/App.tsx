@@ -78,6 +78,9 @@ import AgencyInventory from "./pages/agency/AgencyInventory";
 import PharmacyPartnerships from "./pages/agency/PharmacyPartnerships";
 import PatientReferrals from "./pages/agency/PatientReferrals";
 import ServiceRequests from "./pages/agency/ServiceRequests";
+import StaffAttendance from "./pages/agency/StaffAttendance";
+import LeaveManagement from "./pages/agency/LeaveManagement";
+import StaffPayroll from "./pages/agency/StaffPayroll";
 
 // Provider pages
 import ProviderBookings from "./pages/provider/ProviderBookings";
